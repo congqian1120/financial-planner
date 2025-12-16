@@ -4,6 +4,7 @@ import AnalysisPage from './components/AnalysisPage';
 import HouseholdProfile from './components/HouseholdProfile';
 import RetirementProfile from './components/RetirementProfile';
 import RetirementExpenses from './components/RetirementExpenses';
+import AccountsPage from './components/AccountsPage';
 
 const App: React.FC = () => {
   // Default to 2 (Retirement Expenses) as per previous state
@@ -31,20 +32,7 @@ const App: React.FC = () => {
     }
 
     if (currentStep === 3) {
-      return (
-        <div className="p-8 max-w-4xl animate-in fade-in duration-500">
-           <h1 className="text-3xl font-normal text-slate-800 mb-10">Accounts</h1>
-           <p className="text-slate-600 mb-8">Account configuration is under construction.</p>
-           <div className="border-t border-slate-200 p-4 bg-white flex justify-between mt-auto">
-             <button onClick={prevStep} className="text-slate-600 font-bold py-2 px-8 hover:bg-slate-50 rounded-full transition-colors text-sm">
-                Previous
-            </button>
-             <button onClick={nextStep} className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2 px-8 rounded-full transition-colors shadow-sm text-sm">
-                Next
-            </button>
-        </div>
-        </div>
-      );
+      return <AccountsPage onNext={nextStep} onPrevious={prevStep} />;
     }
 
     if (currentStep === 4) {
