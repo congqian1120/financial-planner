@@ -20,7 +20,7 @@ const HouseholdSummary: React.FC = () => {
           {/* Person 1 */}
           <div className="flex justify-between items-center pb-6 border-b border-slate-200">
             <div>
-              <h4 className="font-bold text-slate-800 uppercase text-sm tracking-wide">Luning Deng</h4>
+              <h4 className="font-bold text-slate-800 uppercase text-sm tracking-wide">Rich Wise</h4>
               <div className="text-slate-600 text-sm mt-1">Age 33 | Currently working</div>
               <div className="text-slate-400 text-xs mt-1 lowercase">yearly income</div>
             </div>
@@ -30,7 +30,7 @@ const HouseholdSummary: React.FC = () => {
           {/* Person 2 */}
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="font-bold text-slate-800 uppercase text-sm tracking-wide">Morris Lam</h4>
+              <h4 className="font-bold text-slate-800 uppercase text-sm tracking-wide">Money Wise</h4>
               <div className="text-slate-600 text-sm mt-1">Age 31 | Currently working</div>
               <div className="text-slate-400 text-xs mt-1 lowercase">yearly income</div>
             </div>

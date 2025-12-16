@@ -6,13 +6,13 @@ const HouseholdProfile: React.FC = () => {
   const [isPartnerPlanning, setIsPartnerPlanning] = useState(true);
 
   // Editable states
-  const [name, setName] = useState("LUNING DENG");
+  const [name, setName] = useState("RICH WISE");
   const [isEditingName, setIsEditingName] = useState(false);
 
   const [dob, setDob] = useState("October 4, 1992");
   const [isEditingDob, setIsEditingDob] = useState(false);
 
-  const [partnerName, setPartnerName] = useState("Morris Lam");
+  const [partnerName, setPartnerName] = useState("Money Wise");
   const [isEditingPartnerName, setIsEditingPartnerName] = useState(false);
 
   const [partnerDob, setPartnerDob] = useState("January 1, 1994");

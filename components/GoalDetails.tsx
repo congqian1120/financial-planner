@@ -75,7 +75,7 @@ const GoalDetails: React.FC = () => {
             <div className="flex items-baseline gap-3">
               <span className="text-2xl font-semibold text-slate-800">67</span>
               <span className="text-slate-600 text-sm">
-                Morris's retirement age <span className="text-slate-400">(planning to 97)</span>
+                Money Wise's retirement age <span className="text-slate-400">(planning to 97)</span>
               </span>
             </div>
             <div className="flex items-baseline gap-3 pt-2">
