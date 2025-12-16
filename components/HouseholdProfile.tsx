@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
-const HouseholdProfile: React.FC = () => {
+interface HouseholdProfileProps {
+  onNext?: () => void;
+}
+
+const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ onNext }) => {
   const [isBonusExpanded, setIsBonusExpanded] = useState(true);
   const [isPartnerPlanning, setIsPartnerPlanning] = useState(true);
 
@@ -309,7 +313,7 @@ const HouseholdProfile: React.FC = () => {
 
         {/* Footer */}
         <div className="border-t border-slate-200 p-4 bg-white flex justify-end sticky bottom-0 z-20">
-             <button className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2 px-8 rounded-full transition-colors shadow-sm text-sm">
+             <button onClick={onNext} className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2 px-8 rounded-full transition-colors shadow-sm text-sm">
                 Next
             </button>
         </div>

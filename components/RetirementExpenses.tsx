@@ -1,13 +1,33 @@
 import React, { useState } from 'react';
-import { CreditCard, ShoppingBag, PiggyBank, CheckSquare, Home, Zap, HeartPulse, Calculator, Pencil, Banknote } from 'lucide-react';
+import { CreditCard, ShoppingBag, PiggyBank, CheckSquare, Home, Zap, HeartPulse, Calculator, Pencil, Banknote, Car, User, Ticket, FileText, Users, Droplets, Smile } from 'lucide-react';
 
-const RetirementExpenses: React.FC = () => {
+interface RetirementExpensesProps {
+  onNext?: () => void;
+  onPrevious?: () => void;
+}
+
+const RetirementExpenses: React.FC<RetirementExpensesProps> = ({ onNext, onPrevious }) => {
   const [planningMethod, setPlanningMethod] = useState<'basic' | 'monthly' | 'detailed'>('basic');
   const [lifestyle, setLifestyle] = useState<'above' | 'average' | 'below'>('average');
   
   // State for Estimated Monthly Expenses inputs
   const [essentialInput, setEssentialInput] = useState<string>("1,000");
   const [nonEssentialInput, setNonEssentialInput] = useState<string>("0");
+
+  // State for Detailed Expenses
+  const [detailedExpenses, setDetailedExpenses] = useState<Record<string, string>>({
+    'Housing & mortgage': '0',
+    'Utilities': '0',
+    'Health care & insurance': '0',
+    'Transportation': '0',
+    'Personal': '0',
+    'Recreation': '0',
+    'Entertainment': '0',
+    'Custom expenses': '0',
+    'Family care': '0',
+  });
+  
+  const [editingCategory, setEditingCategory] = useState<string | null>(null);
 
   const getMethodLabel = () => {
     switch (planningMethod) {
@@ -30,16 +50,76 @@ const RetirementExpenses: React.FC = () => {
             discretionaryLabel: 'Non-essential'
         };
     }
-    // Default/Basic values (static for now based on previous design)
+    if (planningMethod === 'detailed') {
+        const total = Object.values(detailedExpenses).reduce((acc, val) => {
+             return acc + parseInt(val.replace(/,/g, '') || '0', 10);
+        }, 0);
+        return {
+            total: total.toLocaleString(),
+            essential: total.toLocaleString(),
+            discretionary: '0',
+            discretionaryLabel: 'Non-essential'
+        };
+    }
+    
+    // Basic/Lifestyle Method - Estimated US Retirement Standards
+    let basicTotal = 0;
+    let basicEssential = 0;
+    let basicDiscretionary = 0;
+
+    switch (lifestyle) {
+        case 'below':
+            // Approx $49k/year
+            basicTotal = 4100;
+            basicEssential = 3280; // ~80%
+            basicDiscretionary = 820; // ~20%
+            break;
+        case 'average':
+            // Approx $82k/year
+            basicTotal = 6800;
+            basicEssential = 4760; // ~70%
+            basicDiscretionary = 2040; // ~30%
+            break;
+        case 'above':
+            // Approx $150k/year
+            basicTotal = 12500;
+            basicEssential = 7500; // ~60%
+            basicDiscretionary = 5000; // ~40%
+            break;
+        default:
+            basicTotal = 6800;
+            basicEssential = 4760;
+            basicDiscretionary = 2040;
+    }
+
     return {
-        total: '10,924',
-        essential: '8,739',
-        discretionary: '2,185',
+        total: basicTotal.toLocaleString(),
+        essential: basicEssential.toLocaleString(),
+        discretionary: basicDiscretionary.toLocaleString(),
         discretionaryLabel: 'Discretionary'
     };
   };
 
   const totals = getTotals();
+
+  const handleDetailedChange = (category: string, value: string) => {
+    // Only allow digits and commas
+    if (/^[0-9,]*$/.test(value)) {
+        setDetailedExpenses(prev => ({...prev, [category]: value}));
+    }
+  };
+
+  const detailedCategories = [
+    { name: 'Housing & mortgage', icon: Home },
+    { name: 'Utilities', icon: Droplets },
+    { name: 'Health care & insurance', icon: HeartPulse },
+    { name: 'Transportation', icon: Car },
+    { name: 'Personal', icon: User },
+    { name: 'Recreation', icon: Smile },
+    { name: 'Entertainment', icon: Ticket },
+    { name: 'Custom expenses', icon: FileText },
+    { name: 'Family care', icon: Users },
+  ];
 
   return (
     <div className="flex flex-col h-full relative">
@@ -301,62 +381,45 @@ const RetirementExpenses: React.FC = () => {
                      </p>
 
                      <h3 className="text-lg font-medium text-slate-800 mb-1">Detailed Budget Worksheet</h3>
-                     <p className="text-xs text-slate-500 mb-6">Enter your monthly budget in retirement by category and sub-category</p>
+                     <p className="text-xs text-slate-500 mb-6">Itemize your monthly budget in retirement by category and sub-category</p>
 
                      <div className="bg-slate-50 border border-slate-200 rounded-sm max-w-4xl">
-                        {/* Housing & mortgage */}
-                        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-                             <div className="flex items-center gap-4">
-                                 <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
-                                     <Home size={20} />
-                                 </div>
-                                 <span className="font-bold text-slate-700 text-base">Housing & mortgage</span>
-                             </div>
-                             <div className="flex items-center gap-6">
-                                 <button className="text-slate-400 hover:text-slate-600 flex items-center justify-center">
-                                    <Calculator size={20} />
-                                 </button>
-                                 <button className="text-slate-400 hover:text-slate-600 flex items-center justify-center">
-                                    <Pencil size={20} />
-                                 </button>
-                             </div>
-                        </div>
-
-                        {/* Utilities */}
-                        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-                             <div className="flex items-center gap-4">
-                                 <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
-                                     <Zap size={20} />
-                                 </div>
-                                 <span className="font-bold text-slate-700 text-base">Utilities</span>
-                             </div>
-                             <div className="flex items-center gap-6">
-                                 <button className="text-slate-400 hover:text-slate-600 flex items-center justify-center">
-                                    <Calculator size={20} />
-                                 </button>
-                                 <button className="text-slate-400 hover:text-slate-600 flex items-center justify-center">
-                                    <Pencil size={20} />
-                                 </button>
-                             </div>
-                        </div>
-
-                         {/* Health care & insurance */}
-                        <div className="flex items-center justify-between p-6">
-                             <div className="flex items-center gap-4">
-                                 <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
-                                     <HeartPulse size={20} />
-                                 </div>
-                                 <span className="font-bold text-slate-700 text-base">Health care & insurance</span>
-                             </div>
-                             <div className="flex items-center gap-6">
-                                 <button className="text-slate-400 hover:text-slate-600 flex items-center justify-center">
-                                    <Calculator size={20} />
-                                 </button>
-                                 <button className="text-slate-400 hover:text-slate-600 flex items-center justify-center">
-                                    <Pencil size={20} />
-                                 </button>
-                             </div>
-                        </div>
+                        {detailedCategories.map((cat, index) => (
+                            <div key={index} className={`flex items-center justify-between p-6 ${index !== detailedCategories.length - 1 ? 'border-b border-slate-200' : ''}`}>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
+                                        <cat.icon size={20} />
+                                    </div>
+                                    <span className="font-bold text-slate-700 text-base">{cat.name}</span>
+                                </div>
+                                <div className="flex items-center justify-end min-w-[120px]">
+                                    {editingCategory === cat.name ? (
+                                         <div className="relative w-32 animate-in fade-in duration-200">
+                                            <span className="absolute left-3 top-2.5 text-slate-500 font-medium">$</span>
+                                            <input 
+                                                autoFocus
+                                                type="text" 
+                                                value={detailedExpenses[cat.name]}
+                                                onChange={(e) => handleDetailedChange(cat.name, e.target.value)}
+                                                onBlur={() => setEditingCategory(null)}
+                                                onKeyDown={(e) => { if(e.key === 'Enter') setEditingCategory(null) }}
+                                                className="w-full border border-blue-500 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none ring-1 ring-blue-500 shadow-sm text-right bg-white" 
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div 
+                                            className="flex items-center gap-4 cursor-pointer group p-2 -mr-2 rounded hover:bg-slate-100 transition-colors" 
+                                            onClick={() => setEditingCategory(cat.name)}
+                                        >
+                                            <div className="text-slate-600 font-medium group-hover:text-slate-900">${detailedExpenses[cat.name]}</div>
+                                            <button className="text-slate-400 group-hover:text-blue-600 flex items-center justify-center">
+                                                <Pencil size={16} />
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
                      </div>
                 </div>
             )}
@@ -365,10 +428,10 @@ const RetirementExpenses: React.FC = () => {
 
        {/* Footer */}
        <div className="border-t border-slate-200 p-4 bg-white flex justify-between sticky bottom-0 z-20">
-             <button className="text-slate-600 font-bold py-2 px-8 hover:bg-slate-50 rounded-full transition-colors text-sm">
+             <button onClick={onPrevious} className="text-slate-600 font-bold py-2 px-8 hover:bg-slate-50 rounded-full transition-colors text-sm">
                 Previous
             </button>
-             <button className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2 px-8 rounded-full transition-colors shadow-sm text-sm">
+             <button onClick={onNext} className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2 px-8 rounded-full transition-colors shadow-sm text-sm">
                 Next
             </button>
         </div>
