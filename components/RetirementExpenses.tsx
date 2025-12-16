@@ -51,7 +51,7 @@ const RetirementExpenses: React.FC<RetirementExpensesProps> = ({ onNext, onPrevi
         };
     }
     if (planningMethod === 'detailed') {
-        const total = Object.values(detailedExpenses).reduce((acc, val) => {
+        const total = Object.values(detailedExpenses).reduce((acc: number, val: string) => {
              return acc + parseInt(val.replace(/,/g, '') || '0', 10);
         }, 0);
         return {

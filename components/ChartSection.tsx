@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AreaChart,
   Area,
@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
-import { Info } from 'lucide-react';
+import { Info, X } from 'lucide-react';
 import { ProjectionData, ProjectionType } from '../types';
 import { PROJECTION_DATA, YEARLY_CASH_FLOW_DATA, RETIREMENT_YEAR, CHART_COLORS } from '../constants';
 
@@ -75,10 +75,11 @@ interface ChartSectionProps {
 }
 
 const ChartSection: React.FC<ChartSectionProps> = ({ projectionType = ProjectionType.ASSET_PROJECTION }) => {
+  const [showCashFlowModal, setShowCashFlowModal] = useState(false);
 
   if (projectionType === ProjectionType.MONTHLY_CASH_FLOW) {
     return (
-      <div className="w-full min-h-[450px] bg-slate-50/50 p-8 rounded-sm border border-transparent flex flex-col">
+      <div className="w-full min-h-[450px] bg-slate-50/50 p-8 rounded-sm border border-transparent flex flex-col relative">
         <p className="text-slate-800 mb-12">
           You may be on pace to cover <span className="font-semibold">150+%</span> of your monthly expenses in retirement.
         </p>
@@ -107,7 +108,12 @@ const ChartSection: React.FC<ChartSectionProps> = ({ projectionType = Projection
         <div className="mt-auto border-t border-slate-200 pt-8">
             <div className="flex items-baseline gap-4 mb-8">
               <h4 className="font-bold text-slate-800 text-sm">Monthly averages</h4>
-              <button className="text-sm text-slate-500 underline decoration-dotted underline-offset-4 decoration-slate-400 hover:text-slate-800">Learn more about the chart</button>
+              <button 
+                onClick={() => setShowCashFlowModal(true)}
+                className="text-sm text-slate-500 underline decoration-dotted underline-offset-4 decoration-slate-400 hover:text-slate-800 focus:outline-none"
+              >
+                Learn more about the chart
+              </button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -151,6 +157,52 @@ const ChartSection: React.FC<ChartSectionProps> = ({ projectionType = Projection
               </div>
             </div>
         </div>
+
+        {/* Cash Flow Modal */}
+        {showCashFlowModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <div 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+              onClick={() => setShowCashFlowModal(false)}
+            ></div>
+            <div className="relative bg-white rounded shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center p-6 border-b border-slate-100">
+                <h3 className="text-xl font-bold text-slate-800">About this chart</h3>
+                <button 
+                  onClick={() => setShowCashFlowModal(false)}
+                  className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-full hover:bg-slate-100"
+                >
+                  <X size={24} strokeWidth={1.5} />
+                </button>
+              </div>
+              <div className="p-6">
+                <p className="text-slate-600 mb-6 leading-relaxed text-sm">
+                  This chart provides a snapshot of your estimated average monthly cash flow in retirement, comparing what you might have coming in versus what you might need to spend.
+                </p>
+                <div className="space-y-6">
+                   <div>
+                      <h4 className="font-bold text-slate-800 text-sm mb-1">Income (You may have)</h4>
+                      <p className="text-slate-500 text-sm leading-relaxed">
+                        This is the estimated monthly average of your total income sources, including Social Security, pensions, annuities, and sustainable withdrawals from your investment portfolio.
+                      </p>
+                   </div>
+                   <div>
+                      <h4 className="font-bold text-slate-800 text-sm mb-1">Expenses (You may need)</h4>
+                      <p className="text-slate-500 text-sm leading-relaxed">
+                        This represents your projected monthly spending needs, covering both essential expenses (like housing and healthcare) and discretionary spending.
+                      </p>
+                   </div>
+                   <div>
+                      <h4 className="font-bold text-slate-800 text-sm mb-1">Excess Income</h4>
+                      <p className="text-slate-500 text-sm leading-relaxed">
+                        The difference between your estimated income and expenses. A positive number suggests a surplus, while a negative number would indicate a potential gap.
+                      </p>
+                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

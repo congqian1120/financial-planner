@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wallet, MapPin, Banknote, Info, CheckCircle2, BookOpen, User, PieChart, X, AlertCircle, Minus } from 'lucide-react';
+import { Wallet, MapPin, Banknote, Info, CheckCircle2, BookOpen, User, PieChart, X, AlertCircle } from 'lucide-react';
 
 const GoalDetails: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -356,7 +356,7 @@ const GoalDetails: React.FC = () => {
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[1px]" onClick={() => setIsModalOpen(false)}></div>
           <div className="relative bg-[#fcfbf9] rounded-sm shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col">
              {/* Header */}
-             <div className="flex justify-between items-start p-6 border-b border-slate-200">
+             <div className="flex justify-between items-start p-6 border-b border-slate-200 sticky top-0 bg-[#fcfbf9] z-10">
                 <h2 className="text-xl font-bold text-slate-800">Risk assessment</h2>
                 <button onClick={() => setIsModalOpen(false)} className="p-1 hover:bg-slate-200 rounded-full transition-colors">
                     <X size={24} className="text-slate-500" strokeWidth={1.5} />
@@ -371,71 +371,50 @@ const GoalDetails: React.FC = () => {
                  {/* Divider */}
                  <div className="w-full h-px bg-slate-300"></div>
 
-                 {/* Spending - Red */}
+                 {/* Spending - Green */}
                  <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                        <AlertCircle className="fill-[#dc2626] text-white" size={20} strokeWidth={2} />
-                        <span className="font-bold text-slate-800 text-sm">Spending</span>
+                        <CheckCircle2 className="fill-green-50 text-green-700" size={24} strokeWidth={2} />
+                        <span className="font-bold text-slate-900 text-base">Spending</span>
                     </div>
                     <p className="text-sm text-slate-700 leading-relaxed">
-                        When it comes to your retirement expenses, you're going to find that they can be divided into two groups. Essential expenses are things that you wouldn't want to cut back on, while discretionary expenses are things you can live without. Planning isn't only about how much you spend, it's about what portion of your expenses you classify as essential.
+                        When it comes to your retirement expenses, you're going to find that they can be divided into two groups. Essential expenses are things that you wouldn't want to cut back on, while discretionary expenses are the things you can live without. Planning isn't only about how much you spend, it's about what portion of your expenses you classify as essential.
                     </p>
-                    <p className="text-sm font-bold text-slate-800">
-                        Consider reassessing your budget in order to reduce your estimated expenses.
+                    <p className="text-sm font-bold text-slate-900">
+                        Most of your estimated expenses appear to be covered by your plan.
                     </p>
-                    <a href="#" className="text-sm text-slate-600 underline decoration-dotted underline-offset-4 hover:text-slate-900 inline-block">Edit expenses</a>
+                    <a href="#" className="text-sm text-blue-700 underline hover:no-underline inline-block font-medium">Edit expenses</a>
                  </div>
 
-                 {/* Longevity - Green */}
-                 <div className="space-y-3">
+                 {/* Longevity - Yellow */}
+                 <div className="space-y-3 pt-4">
                     <div className="flex items-center gap-2">
-                        <CheckCircle2 className="fill-[#15803d] text-white" size={20} strokeWidth={2} />
-                        <span className="font-bold text-slate-800 text-sm">Longevity</span>
+                        {/* Custom Yellow Icon - Yellow top, white bottom circle */}
+                        <div 
+                          className="w-6 h-6 rounded-full border border-[#ca8a04]"
+                          style={{ background: 'linear-gradient(to bottom, #ca8a04 50%, white 50%)' }}
+                        ></div>
+                        <span className="font-bold text-slate-900 text-base">Longevity</span>
                     </div>
                     <p className="text-sm text-slate-700 leading-relaxed">
                         Today, there's a pretty good chance that people in good health could live into their 90's and beyond. We suggest you plan accordingly.
                     </p>
-                    <p className="text-sm font-bold text-slate-800">
-                        Your plan accounts for the possibility that you may live into your 90's.
+                    <p className="text-sm font-bold text-slate-900">
+                        Consider a planning age that accounts for the possibility that you may live into your 90s.
                     </p>
-                    <a href="#" className="text-sm text-slate-600 underline decoration-dotted underline-offset-4 hover:text-slate-900 inline-block">Edit plan to age</a>
-                 </div>
-
-                 {/* Market Volatility - Green */}
-                 <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                         <CheckCircle2 className="fill-[#15803d] text-white" size={20} strokeWidth={2} />
-                        <span className="font-bold text-slate-800 text-sm">Market volatility</span>
-                    </div>
-                    <p className="text-sm text-slate-700 leading-relaxed">
-                        A lot can happen over the course of time. While you can't control what the market does in a given year, you can control how you prepare for the ups and downs of investing. The key is to select and maintain an asset mix for your retirement plan that's appropriate for your current age, your expected retirement age, your planning age, and your comfort with risk, and diversify your holdings to help manage risk. You should run your analysis assuming a significantly below average market while planning for the potential that your investment returns may be below historic averages.
-                    </p>
-                    <p className="text-sm font-bold text-slate-800">
-                        Check your portfolio's asset allocation and diversification to help manage investment risks. Selecting 'significantly below average market' for your analysis considers the possibility that the market may underperform.
-                    </p>
-                    <a href="#" className="text-sm text-slate-600 underline decoration-dotted underline-offset-4 hover:text-slate-900 inline-block">Explore using a different asset allocation</a>
+                    <a href="#" className="text-sm text-blue-700 underline hover:no-underline inline-block font-medium">Edit plan to age</a>
                  </div>
 
                  {/* Divider */}
-                 <div className="w-full h-px bg-slate-300"></div>
+                 <div className="w-full h-px bg-slate-300 mt-4"></div>
 
                  {/* Legend */}
                  <div>
-                    <h4 className="font-bold text-slate-800 mb-4 text-sm">Legend</h4>
+                    <h4 className="font-bold text-slate-900 mb-4 text-sm">Legend</h4>
                     <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                             <CheckCircle2 className="fill-[#15803d] text-white" size={18} strokeWidth={2} />
+                        <div className="flex items-center gap-2">
+                             <CheckCircle2 className="fill-green-50 text-green-700" size={18} strokeWidth={2} />
                              <span className="text-sm text-slate-600">Your plan appears to account for this risk</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                             <div className="w-[18px] h-[18px] rounded-full bg-[#eab308] flex items-center justify-center">
-                                 <div className="w-2.5 h-1 bg-white rounded-full"></div>
-                             </div>
-                             <span className="text-sm text-slate-600">Your plan has some exposure to this risk</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                             <AlertCircle className="fill-[#dc2626] text-white" size={18} strokeWidth={2} />
-                             <span className="text-sm text-slate-600">Your plan has significant exposure to this risk</span>
                         </div>
                     </div>
                  </div>
