@@ -8,7 +8,11 @@ import HouseholdSummary from './HouseholdSummary';
 import GoalDetails from './GoalDetails';
 import { ViewMode, ProjectionType } from '../types';
 
-const AnalysisPage: React.FC = () => {
+interface AnalysisPageProps {
+  onNavigate: (step: number) => void;
+}
+
+const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.CHART);
   const [projectionType, setProjectionType] = useState<ProjectionType>(ProjectionType.ASSET_PROJECTION);
 
@@ -36,7 +40,7 @@ const AnalysisPage: React.FC = () => {
         
         <HouseholdSummary />
 
-        <GoalDetails />
+        <GoalDetails onNavigate={onNavigate} />
       </main>
     </div>
   );

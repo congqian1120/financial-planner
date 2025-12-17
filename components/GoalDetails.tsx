@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { Wallet, MapPin, Banknote, Info, CheckCircle2, BookOpen, User, PieChart, X, AlertCircle } from 'lucide-react';
 
-const GoalDetails: React.FC = () => {
+interface GoalDetailsProps {
+  onNavigate: (step: number) => void;
+}
+
+const GoalDetails: React.FC<GoalDetailsProps> = ({ onNavigate }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -134,177 +138,65 @@ const GoalDetails: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
           
           {/* Card 1: Retirement savings */}
-          <div className="bg-slate-50 p-6 rounded-sm border border-slate-100 flex flex-col h-full">
-            <h4 className="font-bold text-slate-800 text-sm mb-4">Retirement savings</h4>
+          <div className="bg-slate-50 p-6 rounded-sm border border-slate-100 flex flex-col h-full relative">
+            <div className="flex justify-between items-start mb-6">
+                <h4 className="font-bold text-slate-800 text-sm">Retirement savings</h4>
+                <Info size={16} className="text-slate-400 cursor-help" />
+            </div>
             
-            <div className="mb-6">
-              <h5 className="font-bold text-slate-700 text-xs mb-1">Fidelity believes...</h5>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Everyone should have a retirement plan that ensures that they do not outlive their assets.
-              </p>
-            </div>
-
-            <div className="mb-6">
-              <h5 className="font-bold text-slate-700 text-sm mb-3">Annual withdrawal</h5>
-              <div className="flex gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-full bg-[#d9e5b5] flex items-center justify-center shrink-0 mt-0.5">
-                     <Wallet size={16} className="text-[#4d7c0f]" />
-                  </div>
-                  <p className="text-sm text-slate-600">
-                      It's important to create a proactive retirement income strategy, and then use your savings to cover anything your retirement income does not.
-                  </p>
-              </div>
-              <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#d9e5b5] flex items-center justify-center shrink-0 mt-0.5">
-                     <BookOpen size={16} className="text-[#4d7c0f]" />
-                  </div>
-                  <p className="text-sm text-slate-600">
-                      Fidelity's guideline is to limit withdrawals to 4% - 5% of your initial retirement savings, then keep increasing this withdrawal based on inflation.
-                  </p>
-              </div>
-            </div>
-
             <div className="mb-8">
-              <h5 className="font-bold text-slate-700 text-sm mb-3">Required minimum distributions (RMDs)</h5>
-              <div className="flex gap-3">
-                   <div className="w-8 h-8 rounded-full bg-[#bbf7d0] flex items-center justify-center shrink-0 mt-0.5">
-                     <User size={16} className="text-[#15803d]" />
-                  </div>
-                  <p className="text-sm text-slate-600">
-                      REUBEN, 74, may be required to take, or may already be taking, RMDs from retirement accounts.
-                  </p>
+              <p className="text-sm text-slate-600 mb-1">Planned contributions</p>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-semibold text-slate-800">$50,360</span>
+                <span className="text-xs text-slate-600">yearly</span>
               </div>
             </div>
 
             <div className="mt-auto">
-               <button className="bg-[#15803d] hover:bg-[#166534] text-white font-bold py-2 px-4 rounded-full text-sm transition-colors w-full sm:w-auto">
+               <button className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors w-full shadow-sm">
                   Explore retirement savings strategies
                </button>
-               <div className="mt-3 text-center sm:text-left">
-                  <button className="text-sm font-bold text-slate-700 hover:underline">Edit accounts</button>
-               </div>
             </div>
           </div>
 
           {/* Card 2: Investments */}
-          <div className="bg-slate-50 p-6 rounded-sm border border-slate-100 flex flex-col h-full">
-            <h4 className="font-bold text-slate-800 text-sm mb-4">Investments</h4>
+          <div className="bg-slate-50 p-6 rounded-sm border border-slate-100 flex flex-col h-full relative">
+            <div className="flex justify-between items-start mb-6">
+                <h4 className="font-bold text-slate-800 text-sm">Investments</h4>
+                <Info size={16} className="text-slate-400 cursor-help" />
+            </div>
             
-            <div className="mb-6">
-              <h5 className="font-bold text-slate-700 text-xs mb-1">Fidelity believes...</h5>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Asset allocation is the single most important factor in determining the long-term risk and return characteristics of a diversified portfolio.
-              </p>
-            </div>
-
-            <div className="bg-white p-4 rounded-sm border border-slate-200 mb-6 relative border-l-4 border-l-green-700">
-               <h5 className="font-bold text-slate-700 text-sm mb-3">Asset Mix</h5>
-               <h6 className="text-xs font-semibold text-slate-700 mb-2">Current asset mix</h6>
-               <div className="space-y-1 text-sm">
-                   <div className="flex justify-between text-slate-600"><span>Domestic stock</span><span>87.6%</span></div>
-                   <div className="w-full bg-slate-100 h-px my-1"></div>
-                   <div className="flex justify-between text-slate-600"><span>Foreign stock</span><span>0.0%</span></div>
-                   <div className="w-full bg-slate-100 h-px my-1"></div>
-                   <div className="flex justify-between text-slate-600"><span>Bonds</span><span>4.5%</span></div>
-                   <div className="w-full bg-slate-100 h-px my-1"></div>
-                   <div className="flex justify-between text-slate-600"><span>Short term</span><span>7.9%</span></div>
-                   <div className="w-full bg-slate-100 h-px my-1"></div>
-                   <div className="flex justify-between text-slate-600"><span>Other</span><span>0.0%</span></div>
-               </div>
-               <div className="mt-4 flex gap-2 text-xs text-slate-500 leading-tight">
-                   <Info size={14} className="shrink-0 mt-0.5" />
-                   <p>Diversification and asset allocation do not ensure a profit or guarantee against loss.</p>
-               </div>
-            </div>
-
             <div className="mb-8">
-              <h5 className="font-bold text-slate-700 text-xs mb-2">Fidelity assumes...</h5>
-              <div className="space-y-3">
-                  <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#d9e5b5] flex items-center justify-center shrink-0 mt-0.5">
-                        <PieChart size={16} className="text-[#4d7c0f]" />
-                      </div>
-                      <p className="text-sm text-slate-600">
-                          You're currently rebalancing your portfolio
-                      </p>
-                  </div>
-                   <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#d9e5b5] flex items-center justify-center shrink-0 mt-0.5">
-                        <PieChart size={16} className="text-[#4d7c0f]" />
-                      </div>
-                      <p className="text-sm text-slate-600">
-                          Your stocks and bonds are diversified
-                      </p>
-                  </div>
-                   <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#d9e5b5] flex items-center justify-center shrink-0 mt-0.5">
-                        <PieChart size={16} className="text-[#4d7c0f]" />
-                      </div>
-                      <p className="text-sm text-slate-600">
-                          You're monitoring your portfolio
-                      </p>
-                  </div>
-              </div>
+              <p className="text-sm text-slate-600 mb-1">Target asset mix</p>
+              <div className="text-2xl font-semibold text-slate-800">Not selected</div>
             </div>
 
-             <div className="mt-auto">
-               <button className="bg-[#15803d] hover:bg-[#166534] text-white font-bold py-2 px-4 rounded-full text-sm transition-colors w-full sm:w-auto">
+            <div className="mt-auto">
+               <button className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors w-full shadow-sm">
                   Explore investment strategies
                </button>
             </div>
           </div>
 
           {/* Card 3: Retirement income */}
-          <div className="bg-slate-50 p-6 rounded-sm border border-slate-100 flex flex-col h-full">
-            <h4 className="font-bold text-slate-800 text-sm mb-4">Retirement income</h4>
+          <div className="bg-slate-50 p-6 rounded-sm border border-slate-100 flex flex-col h-full relative">
+            <div className="flex justify-between items-start mb-6">
+                <h4 className="font-bold text-slate-800 text-sm">Retirement income</h4>
+                <Info size={16} className="text-slate-400 cursor-help" />
+            </div>
             
-            <div className="mb-6">
-              <h5 className="font-bold text-slate-700 text-xs mb-1">Fidelity believes...</h5>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Generally, essential expenses (including health insurance) should be covered by reliable sources of lifetime income, such as Social Security, pensions and certain types of annuities.
-              </p>
+            <div className="mb-8">
+              <p className="text-sm text-slate-600 mb-1">First year of retirement</p>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-semibold text-slate-800">$3,750</span>
+                <span className="text-xs text-slate-600">monthly</span>
+              </div>
             </div>
 
-            <div className="bg-white p-4 rounded-sm border border-slate-200 mb-4 border-l-4 border-l-green-700">
-               <h5 className="font-bold text-slate-700 text-sm mb-1">Lifetime Income</h5>
-               <div className="text-sm font-bold text-slate-800 mb-3">$6,578, monthly</div>
-               <div className="space-y-1 text-sm">
-                   <div className="flex justify-between text-slate-600"><span>Social Security</span><span>$6,578 monthly</span></div>
-                   <div className="w-full bg-slate-100 h-px my-1"></div>
-                   <div className="flex justify-between text-slate-600"><span>Pension income</span><span>$0 monthly</span></div>
-                   <div className="w-full bg-slate-100 h-px my-1"></div>
-                   <div className="flex justify-between text-slate-600"><span>Annuity income</span><span>$0 monthly</span></div>
-               </div>
-            </div>
-
-             <div className="bg-white p-4 rounded-sm border border-slate-200 mb-4 border-l-4 border-l-green-700">
-               <h5 className="font-bold text-slate-700 text-sm mb-1">Other income</h5>
-               <div className="text-sm font-bold text-slate-800 mb-3">$0, monthly</div>
-               <div className="space-y-1 text-sm">
-                   <div className="flex justify-between text-slate-600"><span>Other income</span><span>$0 monthly</span></div>
-               </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-sm border border-slate-200 border-l-4 border-l-green-700 mb-8">
-               <h5 className="font-bold text-slate-700 text-sm mb-1">One-time income</h5>
-               <div className="text-sm font-bold text-slate-800 mb-3">$0, one time</div>
-               <div className="space-y-1 text-sm">
-                   <div className="flex justify-between text-slate-600"><span>Lump sum pension income</span><span>$0</span></div>
-                   <div className="w-full bg-slate-100 h-px my-1"></div>
-                   <div className="flex justify-between text-slate-600"><span>One-time income</span><span>$0</span></div>
-               </div>
-            </div>
-
-             <div className="mt-auto">
-               <button className="bg-[#15803d] hover:bg-[#166534] text-white font-bold py-2 px-4 rounded-full text-sm transition-colors w-full sm:w-auto">
+            <div className="mt-auto">
+               <button className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors w-full shadow-sm">
                   Explore income strategies
                </button>
-               <div className="mt-3 text-center sm:text-left">
-                  <button className="text-sm font-bold text-slate-700 hover:underline">Edit retirement income</button>
-               </div>
-               <p className="text-[10px] text-slate-500 mt-4 leading-tight">
-                   These numbers reflect your income in the current year. Also, this income doesn't include withdrawals from the accounts assigned to your retirement goal.
-               </p>
             </div>
           </div>
         </div>
@@ -343,7 +235,7 @@ const GoalDetails: React.FC = () => {
              
              <button 
                 onClick={() => setIsModalOpen(true)}
-                className="text-slate-600 text-sm decoration-dotted underline underline-offset-4 hover:text-slate-900 inline-block"
+                className="text-blue-700 text-sm font-medium hover:underline focus:outline-none"
              >
                 View risk details and action steps
              </button>
@@ -383,7 +275,17 @@ const GoalDetails: React.FC = () => {
                     <p className="text-sm font-bold text-slate-900">
                         Most of your estimated expenses appear to be covered by your plan.
                     </p>
-                    <a href="#" className="text-sm text-blue-700 underline hover:no-underline inline-block font-medium">Edit expenses</a>
+                    <a 
+                      href="#" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onNavigate(2); // Retirement expenses (Step 2)
+                        setIsModalOpen(false);
+                      }}
+                      className="text-sm text-blue-700 underline hover:no-underline inline-block font-medium"
+                    >
+                      Edit expenses
+                    </a>
                  </div>
 
                  {/* Longevity - Yellow */}
@@ -402,7 +304,17 @@ const GoalDetails: React.FC = () => {
                     <p className="text-sm font-bold text-slate-900">
                         Consider a planning age that accounts for the possibility that you may live into your 90s.
                     </p>
-                    <a href="#" className="text-sm text-blue-700 underline hover:no-underline inline-block font-medium">Edit plan to age</a>
+                    <a 
+                      href="#" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onNavigate(0); // Household profile (Step 0)
+                        setIsModalOpen(false);
+                      }}
+                      className="text-sm text-blue-700 underline hover:no-underline inline-block font-medium"
+                    >
+                      Edit plan to age
+                    </a>
                  </div>
 
                  {/* Divider */}
