@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import AnalysisPage from './components/AnalysisPage';
-import HouseholdProfile from './components/HouseholdProfile';
+import { HouseholdProfile } from './components/HouseholdProfile';
 import RetirementProfile from './components/RetirementProfile';
 import RetirementExpenses from './components/RetirementExpenses';
 import AccountsPage from './components/AccountsPage';
@@ -176,7 +176,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 flex">
       <Sidebar activeStep={currentStep} onStepChange={setCurrentStep} />
-      <div className="flex-1 min-w-0 h-screen overflow-y-auto">
+      <div className="flex-1 min-w-0 flex flex-col">
         {renderContent()}
       </div>
     </div>

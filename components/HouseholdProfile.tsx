@@ -8,7 +8,7 @@ interface HouseholdProfileProps {
   onNext?: () => void;
 }
 
-const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, updateData, onNext }) => {
+export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, updateData, onNext }) => {
   const [isBonusExpanded, setIsBonusExpanded] = useState(true);
   
   // Local edit states
@@ -24,8 +24,8 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, updateData, o
   };
 
   return (
-    <div className="flex flex-col h-full relative">
-        <div className="p-8 max-w-4xl animate-in fade-in duration-500 flex-1 overflow-y-auto pb-24">
+    <div className="flex flex-col min-h-screen relative bg-white">
+        <div className="p-8 max-w-4xl animate-in fade-in duration-500 flex-1 pb-24">
         <div className="mb-8">
             <div className="text-sm text-slate-500 mb-4">Navigation</div>
             <h1 className="text-3xl font-normal text-slate-800 mb-10">Household profile</h1>
@@ -254,7 +254,6 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, updateData, o
                 </div>
             </div>
         </div>
-        </div>
 
         {/* Footer */}
         <div className="border-t border-slate-200 p-4 bg-white flex justify-end sticky bottom-0 z-20">
@@ -265,5 +264,3 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, updateData, o
     </div>
   );
 };
-
-export default HouseholdProfile;

@@ -20,8 +20,8 @@ const RetirementProfile: React.FC<RetirementProfileProps> = ({ data, updateData,
   };
 
   return (
-    <div className="flex flex-col h-full relative">
-      <div className="p-8 max-w-4xl animate-in fade-in duration-500 flex-1 overflow-y-auto pb-24">
+    <div className="flex flex-col min-h-screen relative bg-white">
+      <div className="p-8 max-w-4xl animate-in fade-in duration-500 flex-1 pb-24">
         <div className="mb-8">
             <div className="text-sm text-slate-500 mb-4">Navigation</div>
             <h1 className="text-3xl font-normal text-slate-800 mb-10">Retirement profile</h1>

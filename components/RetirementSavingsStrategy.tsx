@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { AppData } from '../types';
@@ -13,6 +13,10 @@ interface RetirementSavingsStrategyProps {
 }
 
 const RetirementSavingsStrategy: React.FC<RetirementSavingsStrategyProps> = ({ data, onBack, onNavigate }) => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [viewMode, setViewMode] = useState<'monthly' | 'yearly'>('monthly');
   const [contributionState, setContributionState] = useState<ContributionState>({
     selectedAmount: 325,
