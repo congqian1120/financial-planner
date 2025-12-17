@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ExternalLink, Info } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { AppData } from '../types';
+import ContributionModeling, { ContributionState } from './ContributionModeling';
+import ModeledContributionStrategy from './ModeledContributionStrategy';
 
 interface RetirementSavingsStrategyProps {
   data: AppData;
@@ -11,6 +13,10 @@ interface RetirementSavingsStrategyProps {
 
 const RetirementSavingsStrategy: React.FC<RetirementSavingsStrategyProps> = ({ data, onBack, onNavigate }) => {
   const [viewMode, setViewMode] = useState<'monthly' | 'yearly'>('monthly');
+  const [contributionState, setContributionState] = useState<ContributionState>({
+    selectedAmount: 325,
+    customAmount: ''
+  });
 
   const { accounts } = data;
   const retirementAccounts = accounts.filter(a => a.goal === 'RETIREMENT');
@@ -69,8 +75,13 @@ const RetirementSavingsStrategy: React.FC<RetirementSavingsStrategyProps> = ({ d
   const isEmpty = totalContributions === 0;
   const displayChartData = isEmpty ? [{ name: 'None', value: 1, color: '#e2e8f0' }] : chartData;
 
+  // Calculate effective additional monthly contribution from state
+  const additionalMonthly = contributionState.selectedAmount === -1 
+      ? parseFloat(contributionState.customAmount.replace(/,/g, '')) || 0
+      : contributionState.selectedAmount;
+
   return (
-    <div className="bg-white min-h-full p-4 md:p-12 max-w-7xl mx-auto animate-in fade-in slide-in-from-right-4 duration-300">
+    <div className="bg-white min-h-full p-4 md:p-12 max-w-7xl mx-auto animate-in fade-in slide-in-from-right-4 duration-300 pb-24">
       <button 
         onClick={onBack}
         className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-8 font-medium transition-colors"
@@ -178,7 +189,6 @@ const RetirementSavingsStrategy: React.FC<RetirementSavingsStrategyProps> = ({ d
                 <div className="space-y-4 flex-1 w-full">
                     {categories.map((item, idx) => {
                          const percentage = totalContributions > 0 ? Math.round((item.value / totalContributions) * 100) : 0;
-                         // Match visual style: circle icon, text link style, right aligned percent
                          const isZero = percentage === 0;
                          
                          return (
@@ -197,6 +207,18 @@ const RetirementSavingsStrategy: React.FC<RetirementSavingsStrategyProps> = ({ d
              </div>
         </div>
       </div>
+      
+      {/* Modeling Components */}
+      <ContributionModeling 
+        data={data} 
+        state={contributionState} 
+        onChange={setContributionState} 
+      />
+
+      <ModeledContributionStrategy 
+        currentBreakdown={{ taxDeferred, taxable, taxExempt, hsa }}
+        additionalContribution={additionalMonthly}
+      />
     </div>
   );
 };
