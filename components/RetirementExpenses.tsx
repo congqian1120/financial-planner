@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, ShoppingBag, PiggyBank, CheckSquare, Home, Zap, HeartPulse, Calculator, Pencil, Banknote, Car, User, Ticket, FileText, Users, Droplets, Smile } from 'lucide-react';
+import { CreditCard, ShoppingBag, PiggyBank, CheckSquare, Home, Zap, HeartPulse, Calculator, Pencil, Banknote, Car, User, Ticket, FileText, Users, Droplets, Smile, CheckCircle2 } from 'lucide-react';
 import { AppData } from '../types';
 
 interface RetirementExpensesProps {
@@ -201,61 +201,94 @@ const RetirementExpenses: React.FC<RetirementExpensesProps> = ({ data, updateDat
                     <h2 className="text-xl font-medium text-slate-800 mb-1">Which of the following best describes your retirement spending?</h2>
                     <a href="#" className="text-sm text-blue-700 hover:underline mb-6 inline-block font-medium">How is this calculated?</a>
 
-                    <div className="space-y-4 max-w-2xl">
+                    <div className="space-y-4 max-w-3xl">
                         {/* Above Average */}
-                        <label className={`cursor-pointer flex items-start gap-4 p-5 border rounded-r-sm transition-all duration-200 ${expenses.lifestyle === 'above' ? 'border-l-4 border-l-green-700 border-y border-r border-slate-300 bg-[#f0fdf4] shadow-sm' : 'border border-slate-300 hover:bg-slate-50'}`}>
-                             <div className="flex flex-col items-center gap-2 w-16 pt-1 shrink-0">
-                                <Banknote size={24} className="text-slate-400" strokeWidth={1} />
+                        <label className={`cursor-pointer flex items-start gap-4 p-6 border rounded-sm transition-all duration-200 ${expenses.lifestyle === 'above' ? 'border-green-700 bg-white shadow-sm ring-1 ring-green-700' : 'border-slate-300 hover:border-slate-400 bg-white'}`}>
+                             <div className="flex flex-col items-center gap-1.5 w-8 pt-1 shrink-0">
                                 <input 
                                     type="radio" 
                                     name="lifestyle" 
                                     checked={expenses.lifestyle === 'above'} 
                                     onChange={() => updateExpenses({ lifestyle: 'above' })}
-                                    className="peer h-4 w-4 mt-1 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" 
+                                    className="peer h-5 w-5 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" 
                                 />
                                 <span className="text-[10px] text-slate-500 font-medium">Select</span>
                             </div>
                             <div className="flex-1">
                                 <h3 className="font-bold text-slate-900 text-base mb-1">Above average</h3>
-                                <p className="text-sm text-slate-600 mb-4">I plan to live lavishly in retirement.</p>
+                                <p className="text-sm text-slate-600 mb-5">I plan to live lavishly in retirement.</p>
+                                
+                                <div className="text-sm font-bold text-slate-800 mb-2">You might choose this option if</div>
+                                <ul className="space-y-2">
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle2 size={18} className="text-slate-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+                                        <span className="text-sm text-slate-600">You expect to do extensive traveling in retirement</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle2 size={18} className="text-slate-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+                                        <span className="text-sm text-slate-600">When shopping, the price isn't your primary consideration</span>
+                                    </li>
+                                </ul>
                             </div>
                         </label>
 
                          {/* Average */}
-                        <label className={`cursor-pointer flex items-start gap-4 p-5 border rounded-r-sm transition-all duration-200 ${expenses.lifestyle === 'average' ? 'border-l-4 border-l-green-700 border-y border-r border-slate-300 bg-[#f0fdf4] shadow-sm' : 'border border-slate-300 hover:bg-slate-50'}`}>
-                             <div className="flex flex-col items-center gap-2 w-16 pt-1 shrink-0">
-                                <Banknote size={24} className="text-slate-400" strokeWidth={1} />
+                        <label className={`cursor-pointer flex items-start gap-4 p-6 border rounded-sm transition-all duration-200 ${expenses.lifestyle === 'average' ? 'border-green-700 bg-white shadow-sm ring-1 ring-green-700' : 'border-slate-300 hover:border-slate-400 bg-white'}`}>
+                             <div className="flex flex-col items-center gap-1.5 w-8 pt-1 shrink-0">
                                 <input 
                                     type="radio" 
                                     name="lifestyle" 
                                     checked={expenses.lifestyle === 'average'} 
                                     onChange={() => updateExpenses({ lifestyle: 'average' })}
-                                    className="peer h-4 w-4 mt-1 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" 
+                                    className="peer h-5 w-5 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" 
                                 />
                                 <span className="text-[10px] text-slate-500 font-medium">Select</span>
                             </div>
                             <div className="flex-1">
                                 <h3 className="font-bold text-slate-900 text-base mb-1">Average</h3>
-                                <p className="text-sm text-slate-600 mb-4">I plan to live an average lifestyle.</p>
+                                <p className="text-sm text-slate-600 mb-5">I plan to live an average lifestyle.</p>
+                                
+                                <div className="text-sm font-bold text-slate-800 mb-2">You might choose this option if</div>
+                                <ul className="space-y-2">
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle2 size={18} className="text-slate-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+                                        <span className="text-sm text-slate-600">You think you'll travel, but not a lot more than you do now</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle2 size={18} className="text-slate-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+                                        <span className="text-sm text-slate-600">When shopping, you're mindful of what's on sale</span>
+                                    </li>
+                                </ul>
                             </div>
                         </label>
 
                          {/* Below Average */}
-                        <label className={`cursor-pointer flex items-start gap-4 p-5 border rounded-r-sm transition-all duration-200 ${expenses.lifestyle === 'below' ? 'border-l-4 border-l-green-700 border-y border-r border-slate-300 bg-[#f0fdf4] shadow-sm' : 'border border-slate-300 hover:bg-slate-50'}`}>
-                             <div className="flex flex-col items-center gap-2 w-16 pt-1 shrink-0">
-                                <Banknote size={24} className="text-slate-400" strokeWidth={1} />
+                        <label className={`cursor-pointer flex items-start gap-4 p-6 border rounded-sm transition-all duration-200 ${expenses.lifestyle === 'below' ? 'border-green-700 bg-white shadow-sm ring-1 ring-green-700' : 'border-slate-300 hover:border-slate-400 bg-white'}`}>
+                             <div className="flex flex-col items-center gap-1.5 w-8 pt-1 shrink-0">
                                 <input 
                                     type="radio" 
                                     name="lifestyle" 
                                     checked={expenses.lifestyle === 'below'} 
                                     onChange={() => updateExpenses({ lifestyle: 'below' })}
-                                    className="peer h-4 w-4 mt-1 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" 
+                                    className="peer h-5 w-5 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" 
                                 />
                                 <span className="text-[10px] text-slate-500 font-medium">Select</span>
                             </div>
                             <div className="flex-1">
                                 <h3 className="font-bold text-slate-900 text-base mb-1">Below average</h3>
-                                <p className="text-sm text-slate-600 mb-4">I plan to spend as little money as possible to help my money last.</p>
+                                <p className="text-sm text-slate-600 mb-5">I plan to spend as little money as possible to help my money last.</p>
+                                
+                                <div className="text-sm font-bold text-slate-800 mb-2">You might choose this option if</div>
+                                <ul className="space-y-2">
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle2 size={18} className="text-slate-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+                                        <span className="text-sm text-slate-600">You plan to limit travel expenses to your visits with loved ones</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle2 size={18} className="text-slate-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+                                        <span className="text-sm text-slate-600">When shopping, you purchase generic brands whenever possible</span>
+                                    </li>
+                                </ul>
                             </div>
                         </label>
                     </div>
