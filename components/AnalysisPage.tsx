@@ -6,6 +6,7 @@ import TableSection from './TableSection';
 import SummaryFooter from './SummaryFooter';
 import HouseholdSummary from './HouseholdSummary';
 import GoalDetails from './GoalDetails';
+import RetirementSavingsStrategy from './RetirementSavingsStrategy';
 import { ViewMode, ProjectionType, AppData } from '../types';
 import { generateProjectionData, generateCashFlowData, CURRENT_YEAR, DEFAULT_CURRENT_AGE } from '../constants';
 
@@ -17,6 +18,7 @@ interface AnalysisPageProps {
 const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.CHART);
   const [projectionType, setProjectionType] = useState<ProjectionType>(ProjectionType.ASSET_PROJECTION);
+  const [showSavingsStrategy, setShowSavingsStrategy] = useState(false);
 
   const { household, retirement, accounts } = data;
 
@@ -47,6 +49,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
     return { projectionData: projData, cashFlowData: flowData, retirementYear: retYear };
   }, [household.dob, retirement.retirementAge, retirement.planToAge, accounts]);
 
+  if (showSavingsStrategy) {
+    return <RetirementSavingsStrategy data={data} onBack={() => setShowSavingsStrategy(false)} onNavigate={onNavigate} />;
+  }
+
   return (
     <div className="p-4 md:p-12 max-w-7xl mx-auto animate-in fade-in duration-500">
       <Header />
@@ -76,7 +82,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
         
         <HouseholdSummary data={data} />
 
-        <GoalDetails data={data} onNavigate={onNavigate} />
+        <GoalDetails 
+          data={data} 
+          onNavigate={onNavigate} 
+          onExploreSavings={() => setShowSavingsStrategy(true)} 
+        />
       </main>
     </div>
   );

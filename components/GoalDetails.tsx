@@ -6,9 +6,10 @@ import { calculateExpenses } from './RetirementExpenses';
 interface GoalDetailsProps {
   data: AppData;
   onNavigate: (step: number) => void;
+  onExploreSavings?: () => void;
 }
 
-const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate }) => {
+const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate, onExploreSavings }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showStrategiesModal, setShowStrategiesModal] = useState(false);
   const [showInvestmentModal, setShowInvestmentModal] = useState(false);
@@ -29,6 +30,15 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate }) => {
   const handleNotMockedClick = (e: React.MouseEvent, feature: string) => {
     e.preventDefault();
     setNotImplementedFeature(feature);
+  };
+
+  const handleExploreSavingsClick = () => {
+    setShowStrategiesModal(false);
+    if (onExploreSavings) {
+      onExploreSavings();
+    } else {
+      setNotImplementedFeature("Retirement savings strategy");
+    }
   };
 
   return (
@@ -300,7 +310,10 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate }) => {
                         <p className="text-slate-600 text-sm leading-relaxed mb-6">
                           The amount you save today may have a significant impact on your ability to meet expenses in retirement. Explore how a new savings strategy could change your outlook.
                         </p>
-                        <button className="border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-700 font-bold py-2 px-6 rounded-full text-sm transition-colors">
+                        <button 
+                          onClick={handleExploreSavingsClick}
+                          className="border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-700 font-bold py-2 px-6 rounded-full text-sm transition-colors"
+                        >
                           Explore savings strategies
                         </button>
                     </div>
