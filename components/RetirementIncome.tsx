@@ -1,11 +1,20 @@
 import React from 'react';
+import { AppData } from '../types';
 
 interface RetirementIncomeProps {
+  data: AppData;
+  updateData: (updates: Partial<AppData>) => void;
   onNext?: () => void;
   onPrevious?: () => void;
 }
 
-const RetirementIncome: React.FC<RetirementIncomeProps> = ({ onNext, onPrevious }) => {
+const RetirementIncome: React.FC<RetirementIncomeProps> = ({ data, updateData, onNext, onPrevious }) => {
+  const { income, household } = data;
+
+  const updateIncome = (updates: Partial<typeof income>) => {
+    updateData({ income: { ...income, ...updates } });
+  };
+
   return (
     <div className="flex flex-col h-full relative">
       <div className="p-8 max-w-6xl animate-in fade-in duration-500 flex-1 overflow-y-auto pb-24">
@@ -18,19 +27,19 @@ const RetirementIncome: React.FC<RetirementIncomeProps> = ({ onNext, onPrevious 
                 {/* Card 1 */}
                 <div className="bg-white p-6 rounded-sm border border-slate-200 border-l-4 border-l-green-700 shadow-sm">
                     <h3 className="font-bold text-slate-700 text-sm mb-4">Lifetime income</h3>
-                    <div className="text-3xl font-normal text-slate-900 mb-2">$2,083<span className="text-lg text-slate-500">/mo</span></div>
+                    <div className="text-3xl font-normal text-slate-900 mb-2">${(income.socialSecurity.amount + income.pension + income.annuity).toLocaleString()}<span className="text-lg text-slate-500">/mo</span></div>
                 </div>
 
                 {/* Card 2 */}
                 <div className="bg-white p-6 rounded-sm border border-slate-200 border-l-4 border-l-green-700 shadow-sm">
                     <h3 className="font-bold text-slate-700 text-sm mb-4">Other recurring income</h3>
-                    <div className="text-3xl font-normal text-slate-900 mb-2">$0<span className="text-lg text-slate-500">/mo</span></div>
+                    <div className="text-3xl font-normal text-slate-900 mb-2">${income.other.toLocaleString()}<span className="text-lg text-slate-500">/mo</span></div>
                 </div>
 
                 {/* Card 3 */}
                 <div className="bg-white p-6 rounded-sm border border-slate-200 border-l-4 border-l-green-700 shadow-sm">
                     <h3 className="font-bold text-slate-700 text-sm mb-4">One-time income</h3>
-                    <div className="text-3xl font-normal text-slate-900 mb-2">$0</div>
+                    <div className="text-3xl font-normal text-slate-900 mb-2">${income.oneTime.toLocaleString()}</div>
                 </div>
             </div>
 
@@ -71,11 +80,11 @@ const RetirementIncome: React.FC<RetirementIncomeProps> = ({ onNext, onPrevious 
                                     </td>
                                     <td className="p-4 text-sm text-slate-800 font-medium">
                                         Social Security
-                                        <div className="text-xs text-slate-500 font-normal mt-0.5">RICH</div>
+                                        <div className="text-xs text-slate-500 font-normal mt-0.5">{household.name}</div>
                                     </td>
-                                    <td className="p-4 text-sm text-slate-800">Yes</td>
-                                    <td className="p-4 text-sm text-slate-800 font-bold">$2,083/mo</td>
-                                    <td className="p-4 text-sm text-slate-800">67</td>
+                                    <td className="p-4 text-sm text-slate-800">{income.socialSecurity.enabled ? 'Yes' : 'No'}</td>
+                                    <td className="p-4 text-sm text-slate-800 font-bold">${income.socialSecurity.amount.toLocaleString()}/mo</td>
+                                    <td className="p-4 text-sm text-slate-800">{income.socialSecurity.startAge}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -90,11 +99,17 @@ const RetirementIncome: React.FC<RetirementIncomeProps> = ({ onNext, onPrevious 
                             Add pension
                          </button>
                     </div>
-                    <div className="bg-slate-50 border border-slate-200 rounded-sm p-6">
-                        <p className="font-bold text-slate-700 text-sm">
-                           You haven't included any pensions yet.
-                        </p>
-                    </div>
+                    {income.pension === 0 ? (
+                        <div className="bg-slate-50 border border-slate-200 rounded-sm p-6">
+                            <p className="font-bold text-slate-700 text-sm">
+                            You haven't included any pensions yet.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="bg-white border border-slate-200 rounded-sm p-4">
+                            <p className="font-bold text-slate-800">${income.pension.toLocaleString()}/mo</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Annuity Section */}
@@ -105,11 +120,17 @@ const RetirementIncome: React.FC<RetirementIncomeProps> = ({ onNext, onPrevious 
                             Add annuity
                          </button>
                     </div>
-                    <div className="bg-slate-50 border border-slate-200 rounded-sm p-6">
-                        <p className="font-bold text-slate-700 text-sm">
-                           You haven't included any annuities yet.
-                        </p>
-                    </div>
+                    {income.annuity === 0 ? (
+                        <div className="bg-slate-50 border border-slate-200 rounded-sm p-6">
+                            <p className="font-bold text-slate-700 text-sm">
+                            You haven't included any annuities yet.
+                            </p>
+                        </div>
+                    ) : (
+                         <div className="bg-white border border-slate-200 rounded-sm p-4">
+                            <p className="font-bold text-slate-800">${income.annuity.toLocaleString()}/mo</p>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -124,11 +145,17 @@ const RetirementIncome: React.FC<RetirementIncomeProps> = ({ onNext, onPrevious 
                 <p className="text-sm text-slate-600 mb-6 leading-relaxed max-w-4xl">
                     This includes things like rental real estate income, alimony, or any other income you receive on a regular basis.
                 </p>
-                <div className="bg-slate-50 border border-slate-200 rounded-sm p-6">
-                    <p className="font-bold text-slate-700 text-sm">
-                        You haven't included any other recurring income yet.
-                    </p>
-                </div>
+                {income.other === 0 ? (
+                    <div className="bg-slate-50 border border-slate-200 rounded-sm p-6">
+                        <p className="font-bold text-slate-700 text-sm">
+                            You haven't included any other recurring income yet.
+                        </p>
+                    </div>
+                ) : (
+                     <div className="bg-white border border-slate-200 rounded-sm p-4">
+                        <p className="font-bold text-slate-800">${income.other.toLocaleString()}/mo</p>
+                    </div>
+                )}
             </div>
 
              {/* One-time Income Section */}
@@ -142,11 +169,17 @@ const RetirementIncome: React.FC<RetirementIncomeProps> = ({ onNext, onPrevious 
                 <p className="text-sm text-slate-600 mb-6 leading-relaxed max-w-4xl">
                     This covers one-time events like the sale of a property or business, an inheritance, or a lump sum distribution.
                 </p>
-                <div className="bg-slate-50 border border-slate-200 rounded-sm p-6">
-                    <p className="font-bold text-slate-700 text-sm">
-                        You haven't included any one-time income yet.
-                    </p>
-                </div>
+                {income.oneTime === 0 ? (
+                    <div className="bg-slate-50 border border-slate-200 rounded-sm p-6">
+                        <p className="font-bold text-slate-700 text-sm">
+                            You haven't included any one-time income yet.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="bg-white border border-slate-200 rounded-sm p-4">
+                        <p className="font-bold text-slate-800">${income.oneTime.toLocaleString()}</p>
+                    </div>
+                )}
             </div>
 
         </div>

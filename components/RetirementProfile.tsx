@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { HelpCircle } from 'lucide-react';
+import { AppData } from '../types';
 
 interface RetirementProfileProps {
+  data: AppData;
+  updateData: (updates: Partial<AppData>) => void;
   onNext?: () => void;
   onPrevious?: () => void;
 }
 
-const RetirementProfile: React.FC<RetirementProfileProps> = ({ onNext, onPrevious }) => {
+const RetirementProfile: React.FC<RetirementProfileProps> = ({ data, updateData, onNext, onPrevious }) => {
   const [goalName, setGoalName] = useState("Retirement");
-  const [retirementAge, setRetirementAge] = useState("69");
-  const [planToAge, setPlanToAge] = useState("97");
   const [taxStatus, setTaxStatus] = useState("Single");
-  const [state, setState] = useState("North Carolina");
+  
+  const { retirement, household } = data;
+
+  const updateRetirement = (updates: Partial<typeof retirement>) => {
+    updateData({ retirement: { ...retirement, ...updates } });
+  };
 
   return (
     <div className="flex flex-col h-full relative">
@@ -42,15 +48,30 @@ const RetirementProfile: React.FC<RetirementProfileProps> = ({ onNext, onPreviou
                              <label className="text-sm font-bold text-slate-800">At what age do you plan to retire?</label>
                         </div>
                          <div className="flex justify-between items-center gap-4">
-                            <div className="text-sm text-slate-500">Retirement age for RICH</div>
+                            <div className="text-sm text-slate-500">Retirement age for {household.name}</div>
                             <input 
                                 type="text" 
-                                value={retirementAge}
-                                onChange={(e) => setRetirementAge(e.target.value)}
+                                value={retirement.retirementAge}
+                                onChange={(e) => updateRetirement({ retirementAge: parseInt(e.target.value) || 0 })}
                                 className="w-16 border border-slate-300 hover:border-slate-400 rounded-sm py-2 px-2 text-center text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                             />
                          </div>
                     </div>
+
+                    {/* Partner Retirement Age (if exists) */}
+                    {household.planningWithPartner && (
+                        <div>
+                             <div className="flex justify-between items-center gap-4 mt-2">
+                                <div className="text-sm text-slate-500">Retirement age for {household.partnerName}</div>
+                                <input 
+                                    type="text" 
+                                    value={retirement.partnerRetirementAge}
+                                    onChange={(e) => updateRetirement({ partnerRetirementAge: parseInt(e.target.value) || 0 })}
+                                    className="w-16 border border-slate-300 hover:border-slate-400 rounded-sm py-2 px-2 text-center text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                                />
+                             </div>
+                        </div>
+                    )}
 
                     {/* Plan-to Age */}
                     <div>
@@ -59,11 +80,11 @@ const RetirementProfile: React.FC<RetirementProfileProps> = ({ onNext, onPreviou
                              <HelpCircle size={16} className="text-blue-700 fill-white cursor-help" />
                         </div>
                          <div className="flex justify-between items-center gap-4">
-                            <div className="text-sm text-slate-500">Plan-to age for RICH</div>
+                            <div className="text-sm text-slate-500">Plan-to age for {household.name}</div>
                             <input 
                                 type="text" 
-                                value={planToAge}
-                                onChange={(e) => setPlanToAge(e.target.value)}
+                                value={retirement.planToAge}
+                                onChange={(e) => updateRetirement({ planToAge: parseInt(e.target.value) || 0 })}
                                 className="w-16 border border-slate-300 hover:border-slate-400 rounded-sm py-2 px-2 text-center text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                             />
                          </div>
@@ -111,8 +132,8 @@ const RetirementProfile: React.FC<RetirementProfileProps> = ({ onNext, onPreviou
                         </div>
                         <div className="relative">
                             <select 
-                                value={state}
-                                onChange={(e) => setState(e.target.value)}
+                                value={retirement.state}
+                                onChange={(e) => updateRetirement({ state: e.target.value })}
                                 className="w-full appearance-none bg-white border border-slate-300 hover:border-slate-400 text-slate-700 py-2.5 px-3 pr-8 rounded-sm leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                             >
                                 <option>North Carolina</option>

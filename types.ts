@@ -22,3 +22,54 @@ export enum ProjectionType {
   MONTHLY_CASH_FLOW = 'Monthly cash flow in retirement',
   YEARLY_CASH_FLOW = 'Yearly cash flow in retirement'
 }
+
+export interface Account {
+  id: number;
+  name: string;
+  number: string;
+  goal: string;
+  type: string;
+  owner: string;
+  value: number;
+  contributions: number;
+  isOutside?: boolean;
+}
+
+export interface AppData {
+  household: {
+    name: string;
+    dob: string;
+    income: number;
+    bonus: number;
+    partnerName: string;
+    partnerDob: string;
+    partnerIncome: number;
+    partnerBonus: number;
+    planningWithPartner: boolean;
+  };
+  retirement: {
+    retirementAge: number;
+    partnerRetirementAge: number;
+    planToAge: number;
+    state: string;
+  };
+  expenses: {
+    method: 'basic' | 'monthly' | 'detailed';
+    lifestyle: 'above' | 'average' | 'below';
+    essential: number;
+    nonEssential: number;
+    detailed: Record<string, number>;
+  };
+  accounts: Account[];
+  income: {
+    socialSecurity: {
+        amount: number;
+        startAge: number;
+        enabled: boolean;
+    };
+    pension: number;
+    annuity: number;
+    other: number;
+    oneTime: number;
+  };
+}

@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { X, ExternalLink } from 'lucide-react';
+import { AppData } from '../types';
 
-const HouseholdSummary: React.FC = () => {
+interface HouseholdSummaryProps {
+  data: AppData;
+}
+
+const HouseholdSummary: React.FC<HouseholdSummaryProps> = ({ data }) => {
   const [showProbabilityModal, setShowProbabilityModal] = useState(false);
+  const { household } = data;
 
   // Simplified data for the small widget
   const gaugeData = [
@@ -34,22 +40,24 @@ const HouseholdSummary: React.FC = () => {
           {/* Person 1 */}
           <div className="flex justify-between items-center pb-6 border-b border-slate-200">
             <div>
-              <h4 className="font-bold text-slate-800 uppercase text-sm tracking-wide">Rich Wise</h4>
+              <h4 className="font-bold text-slate-800 uppercase text-sm tracking-wide">{household.name}</h4>
               <div className="text-slate-600 text-sm mt-1">Age 33 | Currently working</div>
               <div className="text-slate-400 text-xs mt-1 lowercase">yearly income</div>
             </div>
-            <div className="text-slate-900 font-medium text-lg tracking-tight">$158,000</div>
+            <div className="text-slate-900 font-medium text-lg tracking-tight">${(household.income + household.bonus).toLocaleString()}</div>
           </div>
 
           {/* Person 2 */}
-          <div className="flex justify-between items-center">
-            <div>
-              <h4 className="font-bold text-slate-800 uppercase text-sm tracking-wide">Money Wise</h4>
-              <div className="text-slate-600 text-sm mt-1">Age 31 | Currently working</div>
-              <div className="text-slate-400 text-xs mt-1 lowercase">yearly income</div>
+          {household.planningWithPartner && (
+            <div className="flex justify-between items-center">
+                <div>
+                <h4 className="font-bold text-slate-800 uppercase text-sm tracking-wide">{household.partnerName}</h4>
+                <div className="text-slate-600 text-sm mt-1">Age 31 | Currently working</div>
+                <div className="text-slate-400 text-xs mt-1 lowercase">yearly income</div>
+                </div>
+                <div className="text-slate-900 font-medium text-lg tracking-tight">${(household.partnerIncome + household.partnerBonus).toLocaleString()}</div>
             </div>
-            <div className="text-slate-900 font-medium text-lg tracking-tight">$72,000</div>
-          </div>
+          )}
         </div>
       </div>
 

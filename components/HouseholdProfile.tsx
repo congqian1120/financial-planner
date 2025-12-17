@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
 import { HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AppData } from '../types';
 
 interface HouseholdProfileProps {
+  data: AppData;
+  updateData: (updates: Partial<AppData>) => void;
   onNext?: () => void;
 }
 
-const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ onNext }) => {
+const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, updateData, onNext }) => {
   const [isBonusExpanded, setIsBonusExpanded] = useState(true);
-  const [isPartnerPlanning, setIsPartnerPlanning] = useState(true);
-
-  // Editable states
-  const [name, setName] = useState("RICH WISE");
+  
+  // Local edit states
   const [isEditingName, setIsEditingName] = useState(false);
-
-  const [dob, setDob] = useState("October 4, 1992");
   const [isEditingDob, setIsEditingDob] = useState(false);
-
-  const [partnerName, setPartnerName] = useState("Money Wise");
   const [isEditingPartnerName, setIsEditingPartnerName] = useState(false);
-
-  const [partnerDob, setPartnerDob] = useState("January 1, 1994");
   const [isEditingPartnerDob, setIsEditingPartnerDob] = useState(false);
+
+  const { household } = data;
+
+  const updateHousehold = (updates: Partial<typeof household>) => {
+    updateData({ household: { ...household, ...updates } });
+  };
 
   return (
     <div className="flex flex-col h-full relative">
@@ -46,12 +47,12 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ onNext }) => {
                     {isEditingName ? (
                         <input 
                             type="text" 
-                            value={name} 
-                            onChange={(e) => setName(e.target.value)}
+                            value={household.name} 
+                            onChange={(e) => updateHousehold({ name: e.target.value })}
                             className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm uppercase"
                         />
                     ) : (
-                        <div className="text-lg text-slate-700 uppercase tracking-wide">{name}</div>
+                        <div className="text-lg text-slate-700 uppercase tracking-wide">{household.name}</div>
                     )}
                 </div>
 
@@ -69,13 +70,13 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ onNext }) => {
                     {isEditingDob ? (
                         <input 
                             type="text" 
-                            value={dob}
-                            onChange={(e) => setDob(e.target.value)}
+                            value={household.dob}
+                            onChange={(e) => updateHousehold({ dob: e.target.value })}
                             className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                         />
                     ) : (
                         <>
-                            <div className="text-lg text-slate-700">{dob}</div>
+                            <div className="text-lg text-slate-700">{household.dob}</div>
                             <div className="text-sm text-slate-500 mt-1">Age 33</div>
                         </>
                     )}
@@ -98,30 +99,6 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ onNext }) => {
                     </div>
                 </div>
 
-                {/* Working Status */}
-                <div>
-                    <div className="flex items-center gap-2 mb-3">
-                        <label className="text-sm font-bold text-slate-800">Working status</label>
-                        <HelpCircle size={16} className="text-blue-700 fill-white" />
-                    </div>
-                    <div className="flex flex-wrap gap-x-6 gap-y-2">
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                            <div className="relative flex items-center">
-                                <input type="radio" name="working_status" className="peer h-4 w-4 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" defaultChecked />
-                            </div>
-                            <span className="text-slate-700 group-hover:text-slate-900">Still working</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                            <input type="radio" name="working_status" className="h-4 w-4 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" />
-                            <span className="text-slate-700 group-hover:text-slate-900">Retired</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                            <input type="radio" name="working_status" className="h-4 w-4 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" />
-                            <span className="text-slate-700 group-hover:text-slate-900">Neither</span>
-                        </label>
-                    </div>
-                </div>
-
                 {/* Earned Income */}
                 <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -135,7 +112,8 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ onNext }) => {
                             type="text" 
                             className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
                             placeholder="0" 
-                            defaultValue="136,750" 
+                            value={household.income}
+                            onChange={(e) => updateHousehold({ income: parseInt(e.target.value) || 0 })}
                         />
                     </div>
 
@@ -162,18 +140,8 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ onNext }) => {
                                     <input 
                                         type="text" 
                                         className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
-                                        defaultValue="21,250" 
-                                    />
-                                </div>
-                             </div>
-                             <div>
-                                <div className="text-xs font-bold text-slate-700 mb-1">Commissions <span className="font-normal text-slate-500">(optional)</span></div>
-                                <div className="relative max-w-xs">
-                                    <span className="absolute left-3 top-2.5 text-slate-500 font-medium">$</span>
-                                    <input 
-                                        type="text" 
-                                        className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
-                                        defaultValue="0" 
+                                        value={household.bonus}
+                                        onChange={(e) => updateHousehold({ bonus: parseInt(e.target.value) || 0 })}
                                     />
                                 </div>
                              </div>
@@ -191,12 +159,12 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ onNext }) => {
                          <HelpCircle size={16} className="text-blue-700 fill-white" />
                     </div>
                      
-                    {!isPartnerPlanning ? (
+                    {!household.planningWithPartner ? (
                         <label className="flex items-center gap-2 cursor-pointer group">
                             <input 
                                 type="checkbox" 
-                                checked={isPartnerPlanning}
-                                onChange={(e) => setIsPartnerPlanning(e.target.checked)}
+                                checked={household.planningWithPartner}
+                                onChange={(e) => updateHousehold({ planningWithPartner: e.target.checked })}
                                 className="h-4 w-4 border-gray-300 rounded-sm text-green-700 focus:ring-green-700 accent-green-700" 
                             />
                             <span className="text-slate-700 group-hover:text-slate-900 text-sm">Yes, I'm planning with a partner</span>
@@ -206,7 +174,7 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ onNext }) => {
                              <div className="mb-6">
                                 <p className="text-sm text-slate-700 mb-4">Yes, I'm planning with a partner</p>
                                 <button 
-                                    onClick={() => setIsPartnerPlanning(false)}
+                                    onClick={() => updateHousehold({ planningWithPartner: false })}
                                     className="text-sm font-semibold text-slate-700 bg-slate-200 hover:bg-slate-300 py-2 px-6 rounded-full transition-colors"
                                 >
                                     Remove partner
@@ -228,12 +196,12 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ onNext }) => {
                                     {isEditingPartnerName ? (
                                         <input 
                                             type="text" 
-                                            value={partnerName}
-                                            onChange={(e) => setPartnerName(e.target.value)}
+                                            value={household.partnerName}
+                                            onChange={(e) => updateHousehold({ partnerName: e.target.value })}
                                             className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                                         />
                                     ) : (
-                                        <div className="text-lg text-slate-700 tracking-wide">{partnerName}</div>
+                                        <div className="text-lg text-slate-700 tracking-wide uppercase">{household.partnerName}</div>
                                     )}
                                 </div>
 
@@ -251,56 +219,33 @@ const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ onNext }) => {
                                     {isEditingPartnerDob ? (
                                         <input 
                                             type="text" 
-                                            value={partnerDob}
-                                            onChange={(e) => setPartnerDob(e.target.value)}
+                                            value={household.partnerDob}
+                                            onChange={(e) => updateHousehold({ partnerDob: e.target.value })}
                                             className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                                         />
                                     ) : (
                                         <>
-                                            <div className="text-lg text-slate-700">{partnerDob}</div>
+                                            <div className="text-lg text-slate-700">{household.partnerDob}</div>
                                             <div className="text-sm text-slate-500 mt-1">Age 31</div>
                                         </>
                                     )}
                                 </div>
 
-                                {/* Partner's Gender */}
+                                {/* Partner Income - Added for completeness */}
                                 <div>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <label className="text-sm font-bold text-slate-800">Partner's gender</label>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <label className="text-sm font-bold text-slate-800">Partner's earned income</label>
                                         <HelpCircle size={16} className="text-blue-700 fill-white" />
                                     </div>
-                                    <div className="relative w-40">
-                                        <select className="w-full appearance-none bg-white border border-slate-300 hover:border-slate-400 text-slate-700 py-2.5 px-3 pr-8 rounded-sm leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
-                                            <option>Female</option>
-                                            <option>Male</option>
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
-                                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Partner's Working Status */}
-                                <div>
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <label className="text-sm font-bold text-slate-800">Partner's working status</label>
-                                        <HelpCircle size={16} className="text-blue-700 fill-white" />
-                                    </div>
-                                    <div className="flex flex-wrap gap-x-6 gap-y-2">
-                                        <label className="flex items-center gap-2 cursor-pointer group">
-                                            <div className="relative flex items-center">
-                                                <input type="radio" name="partner_working_status" className="peer h-4 w-4 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" defaultChecked />
-                                            </div>
-                                            <span className="text-slate-700 group-hover:text-slate-900">Still working</span>
-                                        </label>
-                                        <label className="flex items-center gap-2 cursor-pointer group">
-                                            <input type="radio" name="partner_working_status" className="h-4 w-4 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" />
-                                            <span className="text-slate-700 group-hover:text-slate-900">Retired</span>
-                                        </label>
-                                        <label className="flex items-center gap-2 cursor-pointer group">
-                                            <input type="radio" name="partner_working_status" className="h-4 w-4 border-gray-300 text-green-700 focus:ring-green-700 accent-green-700" />
-                                            <span className="text-slate-700 group-hover:text-slate-900">Neither</span>
-                                        </label>
+                                    <div className="relative max-w-xs mb-4">
+                                        <span className="absolute left-3 top-2.5 text-slate-500 font-medium">$</span>
+                                        <input 
+                                            type="text" 
+                                            className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
+                                            placeholder="0" 
+                                            value={household.partnerIncome}
+                                            onChange={(e) => updateHousehold({ partnerIncome: parseInt(e.target.value) || 0 })}
+                                        />
                                     </div>
                                 </div>
                              </div>

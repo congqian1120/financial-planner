@@ -6,13 +6,14 @@ import TableSection from './TableSection';
 import SummaryFooter from './SummaryFooter';
 import HouseholdSummary from './HouseholdSummary';
 import GoalDetails from './GoalDetails';
-import { ViewMode, ProjectionType } from '../types';
+import { ViewMode, ProjectionType, AppData } from '../types';
 
 interface AnalysisPageProps {
+  data: AppData;
   onNavigate: (step: number) => void;
 }
 
-const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
+const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.CHART);
   const [projectionType, setProjectionType] = useState<ProjectionType>(ProjectionType.ASSET_PROJECTION);
 
@@ -38,9 +39,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate }) => {
 
         <SummaryFooter projectionType={projectionType} />
         
-        <HouseholdSummary />
+        <HouseholdSummary data={data} />
 
-        <GoalDetails onNavigate={onNavigate} />
+        <GoalDetails data={data} onNavigate={onNavigate} />
       </main>
     </div>
   );

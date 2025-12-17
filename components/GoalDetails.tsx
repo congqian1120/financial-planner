@@ -1,12 +1,25 @@
 import React, { useState } from 'react';
 import { Wallet, MapPin, Banknote, Info, CheckCircle2, BookOpen, User, PieChart, X, AlertCircle } from 'lucide-react';
+import { AppData } from '../types';
+import { calculateExpenses } from './RetirementExpenses';
 
 interface GoalDetailsProps {
+  data: AppData;
   onNavigate: (step: number) => void;
 }
 
-const GoalDetails: React.FC<GoalDetailsProps> = ({ onNavigate }) => {
+const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { retirement, accounts, household, income } = data;
+
+  // Derived Calculations
+  const totalSaved = accounts.filter(a => a.goal === 'RETIREMENT').reduce((sum, a) => sum + a.value, 0);
+  const totalContributions = accounts.filter(a => a.goal === 'RETIREMENT').reduce((sum, a) => sum + a.contributions, 0);
+  const assignedAccountsCount = accounts.filter(a => a.goal === 'RETIREMENT').length;
+  
+  const expenses = calculateExpenses(data.expenses);
+
+  const lifetimeIncome = income.socialSecurity.amount + income.pension + income.annuity;
 
   return (
     <div className="mt-12 pt-12 border-t border-slate-200 relative">
@@ -32,12 +45,12 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ onNavigate }) => {
               </div>
               <span className="font-semibold text-slate-700 text-lg">Total saved</span>
             </div>
-            <button className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">Edit</button>
+            <button onClick={() => onNavigate(3)} className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">Edit</button>
           </div>
 
           <div className="mb-6">
-            <div className="text-3xl font-normal text-slate-900 mb-1">$966,890</div>
-            <p className="text-slate-500 text-sm">from 7 out of 8 accounts</p>
+            <div className="text-3xl font-normal text-slate-900 mb-1">${totalSaved.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+            <p className="text-slate-500 text-sm">from {assignedAccountsCount} out of {accounts.length} accounts</p>
           </div>
 
           <div className="space-y-3">
@@ -68,24 +81,26 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ onNavigate }) => {
               </div>
               <span className="font-semibold text-slate-700 text-lg">Retirement profile</span>
             </div>
-             <button className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">Edit</button>
+             <button onClick={() => onNavigate(1)} className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">Edit</button>
           </div>
 
           <div className="space-y-6">
             <div className="flex items-baseline gap-3">
-              <span className="text-2xl font-semibold text-slate-800">69</span>
+              <span className="text-2xl font-semibold text-slate-800">{retirement.retirementAge}</span>
               <span className="text-slate-600 text-sm">
-                Your retirement age <span className="text-slate-400">(planning to 97)</span>
+                Your retirement age <span className="text-slate-400">(planning to {retirement.planToAge})</span>
               </span>
             </div>
-            <div className="flex items-baseline gap-3">
-              <span className="text-2xl font-semibold text-slate-800">67</span>
-              <span className="text-slate-600 text-sm">
-                Money Wise's retirement age <span className="text-slate-400">(planning to 97)</span>
-              </span>
-            </div>
+            {household.planningWithPartner && (
+              <div className="flex items-baseline gap-3">
+                <span className="text-2xl font-semibold text-slate-800">{retirement.partnerRetirementAge}</span>
+                <span className="text-slate-600 text-sm">
+                  {household.partnerName}'s retirement age <span className="text-slate-400">(planning to {retirement.planToAge})</span>
+                </span>
+              </div>
+            )}
             <div className="flex items-baseline gap-3 pt-2">
-              <span className="text-xl font-semibold text-slate-800">North Carolina</span>
+              <span className="text-xl font-semibold text-slate-800">{retirement.state}</span>
               <span className="text-slate-500 text-sm">Retirement state</span>
             </div>
           </div>
@@ -100,25 +115,25 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ onNavigate }) => {
               </div>
               <span className="font-semibold text-slate-700 text-lg">Expenses</span>
             </div>
-            <button className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">Edit</button>
+            <button onClick={() => onNavigate(2)} className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">Edit</button>
           </div>
 
           <div className="space-y-4">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-semibold text-slate-900">$10,666</span>
+              <span className="text-2xl font-semibold text-slate-900">${expenses.essential.toLocaleString()}</span>
               <span className="text-slate-500 text-sm">/mo Essential expenses</span>
             </div>
              <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-semibold text-slate-900">$2,666</span>
+              <span className="text-2xl font-semibold text-slate-900">${expenses.discretionary.toLocaleString()}</span>
               <span className="text-slate-500 text-sm">/mo Non-essential expenses</span>
             </div>
              <div className="flex items-baseline gap-2 pt-1">
-              <span className="text-2xl font-semibold text-slate-900">$13,332</span>
+              <span className="text-2xl font-semibold text-slate-900">${expenses.total.toLocaleString()}</span>
               <span className="text-slate-500 text-sm">/mo Total expenses</span>
             </div>
 
             <div className="pt-4 text-sm text-slate-500">
-                Expense method: <span className="text-slate-600">Lifestyle</span>
+                Expense method: <span className="text-slate-600 capitalize">{data.expenses.method === 'basic' ? 'Lifestyle' : data.expenses.method}</span>
             </div>
           </div>
         </div>
@@ -147,7 +162,7 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ onNavigate }) => {
             <div className="mb-8">
               <p className="text-sm text-slate-600 mb-1">Planned contributions</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-semibold text-slate-800">$50,360</span>
+                <span className="text-2xl font-semibold text-slate-800">${totalContributions.toLocaleString()}</span>
                 <span className="text-xs text-slate-600">yearly</span>
               </div>
             </div>
@@ -188,7 +203,7 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ onNavigate }) => {
             <div className="mb-8">
               <p className="text-sm text-slate-600 mb-1">First year of retirement</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-semibold text-slate-800">$3,750</span>
+                <span className="text-2xl font-semibold text-slate-800">${income.socialSecurity.amount.toLocaleString()}</span>
                 <span className="text-xs text-slate-600">monthly</span>
               </div>
             </div>

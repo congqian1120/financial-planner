@@ -1,99 +1,16 @@
 import React, { useState } from 'react';
 import { Plus, Check, Info, ChevronDown, ChevronsUpDown, X } from 'lucide-react';
+import { AppData, Account } from '../types';
 
 interface AccountsPageProps {
+  data: AppData;
+  updateData: (updates: Partial<AppData>) => void;
   onNext?: () => void;
   onPrevious?: () => void;
 }
 
-interface Account {
-  id: number;
-  name: string;
-  number: string;
-  goal: string;
-  type: string;
-  owner: string;
-  value: number;
-  contributions: number;
-}
-
-const AccountsPage: React.FC<AccountsPageProps> = ({ onNext, onPrevious }) => {
-  // Initial mock data
-  const [accounts, setAccounts] = useState<Account[]>([
-      { 
-        id: 1, 
-        name: "ROTH IRA", 
-        number: "XXXX9977", 
-        goal: "RETIREMENT", 
-        type: "ROTH IRA\nSelf-Directed", 
-        owner: "RICH", 
-        value: 59284.43, 
-        contributions: 0 
-      },
-      { 
-        id: 2, 
-        name: "INDIVIDUAL - TOD", 
-        number: "XXXX7621", 
-        goal: "RETIREMENT", 
-        type: "INDIVIDUAL - TOD\nFidelity Go", 
-        owner: "RICH", 
-        value: 75.10, 
-        contributions: 0 
-      },
-      { 
-        id: 3, 
-        name: "401K RETIREMENT SAVINGS PLAN", 
-        number: "XXXX3321", 
-        goal: "RETIREMENT", 
-        type: "401K RETIREMENT SAVINGS PLAN", 
-        owner: "RICH", 
-        value: 441757.88, 
-        contributions: 20500 
-      },
-      { 
-        id: 4, 
-        name: "INDIVIDUAL - TOD", 
-        number: "XXXX5512", 
-        goal: "RETIREMENT", 
-        type: "INDIVIDUAL - TOD\nFidelity Go", 
-        owner: "RICH", 
-        value: 50.00, 
-        contributions: 0 
-      },
-      { 
-        id: 5, 
-        name: "INDIVIDUAL - TOD", 
-        number: "XXXX0562", 
-        goal: "RETIREMENT", 
-        type: "INDIVIDUAL - TOD\nSelf-Directed", 
-        owner: "RICH", 
-        value: 485742.99, 
-        contributions: 0 
-      },
-      { 
-        id: 6, 
-        name: "HEALTH SAVINGS ACCOUNT", 
-        number: "XXXX8430", 
-        goal: "RETIREMENT", 
-        type: "HEALTH SAVINGS ACCOUNT\nSelf-Directed", 
-        owner: "RICH", 
-        value: 4551.10, 
-        contributions: 3500 
-      },
-      { 
-        id: 7, 
-        name: "INDIVIDUAL - TOD", 
-        number: "XXXX4509", 
-        goal: "UNASSIGNED", 
-        type: "INDIVIDUAL - TOD\nSelf-Directed", 
-        owner: "RICH", 
-        value: 164681.94, 
-        contributions: 0 
-      },
-  ]);
-
-  const [outsideAccounts, setOutsideAccounts] = useState<Account[]>([]);
-
+const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, onPrevious }) => {
+  const { accounts } = data;
   const [editingId, setEditingId] = useState<number | null>(null);
   
   const [editValues, setEditValues] = useState<{
@@ -105,6 +22,14 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ onNext, onPrevious }) => {
       value: string;
       contributions: string;
   }>({ name: '', number: '', goal: '', type: '', owner: '', value: '', contributions: '' });
+
+  const totalBalance = accounts
+    .filter(a => a.goal === 'RETIREMENT')
+    .reduce((sum, a) => sum + a.value, 0);
+
+  const totalContributions = accounts
+    .filter(a => a.goal === 'RETIREMENT')
+    .reduce((sum, a) => sum + a.contributions, 0);
 
   const handleEditClick = (acc: Account) => {
     setEditingId(acc.id);
@@ -119,14 +44,15 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ onNext, onPrevious }) => {
     });
   };
 
-  const handleSaveClick = (id: number, isOutside: boolean) => {
-    const updater = (prev: Account[]) => prev.map(acc => {
+  const handleSaveClick = (id: number) => {
+    const updatedAccounts = accounts.map(acc => {
       if (acc.id === id) {
         return {
           ...acc,
           goal: editValues.goal,
           contributions: parseFloat(editValues.contributions.replace(/,/g, '')) || 0,
-          ...(isOutside ? {
+          // Only update other fields if outside account
+          ...(acc.isOutside ? {
              name: editValues.name,
              number: editValues.number,
              type: editValues.type,
@@ -138,11 +64,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ onNext, onPrevious }) => {
       return acc;
     });
 
-    if (isOutside) {
-        setOutsideAccounts(updater);
-    } else {
-        setAccounts(updater);
-    }
+    updateData({ accounts: updatedAccounts });
     setEditingId(null);
   };
 
@@ -151,12 +73,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ onNext, onPrevious }) => {
   };
 
   const handleAddOutsideAccount = () => {
-      // Generate a unique ID that doesn't conflict with existing accounts
-      const maxId = Math.max(
-          ...accounts.map(a => a.id), 
-          ...outsideAccounts.map(a => a.id), 
-          0
-      );
+      const maxId = Math.max(...accounts.map(a => a.id), 0);
       const newId = maxId + 1;
       
       const newAccount: Account = {
@@ -167,10 +84,11 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ onNext, onPrevious }) => {
           type: "MANUAL",
           owner: "RICH",
           value: 0,
-          contributions: 0
+          contributions: 0,
+          isOutside: true
       };
       
-      setOutsideAccounts([...outsideAccounts, newAccount]);
+      updateData({ accounts: [...accounts, newAccount] });
       
       // Auto-edit the new account
       setEditingId(newId);
@@ -232,7 +150,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ onNext, onPrevious }) => {
                             {isEditing ? (
                                 <div className="flex flex-col gap-1 items-start">
                                     <button 
-                                        onClick={() => handleSaveClick(acc.id, isOutside)}
+                                        onClick={() => handleSaveClick(acc.id)}
                                         className="text-xs text-white bg-green-700 hover:bg-green-800 px-3 py-1 rounded-sm font-bold shadow-sm"
                                     >
                                         Save
@@ -380,14 +298,14 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ onNext, onPrevious }) => {
                 {/* Card 1 */}
                 <div className="bg-white p-6 rounded-sm border border-slate-200 border-l-4 border-l-green-700 shadow-sm">
                     <h3 className="font-bold text-slate-700 text-sm mb-4">Assigned retirement balance</h3>
-                    <div className="text-3xl font-normal text-slate-900 mb-2">$991,461</div>
-                    <div className="text-sm text-slate-500">from 6 out of 7 accounts</div>
+                    <div className="text-3xl font-normal text-slate-900 mb-2">${totalBalance.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                    <div className="text-sm text-slate-500">from {accounts.filter(a => a.goal === 'RETIREMENT').length} out of {accounts.length} accounts</div>
                 </div>
 
                 {/* Card 2 */}
                 <div className="bg-white p-6 rounded-sm border border-slate-200 border-l-4 border-l-green-700 shadow-sm">
                     <h3 className="font-bold text-slate-700 text-sm mb-4">Retirement contributions</h3>
-                    <div className="text-3xl font-normal text-slate-900 mb-2">$24,000<span className="text-lg text-slate-500">/yr</span></div>
+                    <div className="text-3xl font-normal text-slate-900 mb-2">${totalContributions.toLocaleString(undefined, {maximumFractionDigits: 0})}<span className="text-lg text-slate-500">/yr</span></div>
                 </div>
 
                 {/* Card 3 */}
@@ -440,8 +358,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ onNext, onPrevious }) => {
                      This is a list of your accounts at Fidelity. If you would like to update contributions or account assignment you can do so by clicking on Edit.
                  </p>
                  
-                 {/* Accounts Table - Fidelity */}
-                 {renderTable(accounts, false)}
+                 {renderTable(accounts.filter(a => !a.isOutside), false)}
             </div>
 
             {/* Accounts outside of Fidelity */}
@@ -456,7 +373,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ onNext, onPrevious }) => {
                      These are all of the non-Fidelity accounts that you've told us about.
                  </p>
                  
-                 {outsideAccounts.length === 0 ? (
+                 {accounts.filter(a => a.isOutside).length === 0 ? (
                      <div className="bg-slate-50 border border-slate-200 rounded-sm p-6 mb-4">
                          <p className="font-bold text-slate-700 text-sm">
                             You haven't linked or included any non-Fidelity accounts yet.
@@ -464,7 +381,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ onNext, onPrevious }) => {
                      </div>
                  ) : (
                      <div className="mb-4">
-                        {renderTable(outsideAccounts, true)}
+                        {renderTable(accounts.filter(a => a.isOutside), true)}
                      </div>
                  )}
 

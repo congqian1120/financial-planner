@@ -6,10 +6,136 @@ import RetirementProfile from './components/RetirementProfile';
 import RetirementExpenses from './components/RetirementExpenses';
 import AccountsPage from './components/AccountsPage';
 import RetirementIncome from './components/RetirementIncome';
+import { AppData, Account } from './types';
+
+const INITIAL_ACCOUNTS: Account[] = [
+  { 
+    id: 1, 
+    name: "ROTH IRA", 
+    number: "XXXX9977", 
+    goal: "RETIREMENT", 
+    type: "ROTH IRA\nSelf-Directed", 
+    owner: "RICH", 
+    value: 59284.43, 
+    contributions: 0 
+  },
+  { 
+    id: 2, 
+    name: "INDIVIDUAL - TOD", 
+    number: "XXXX7621", 
+    goal: "RETIREMENT", 
+    type: "INDIVIDUAL - TOD\nFidelity Go", 
+    owner: "RICH", 
+    value: 75.10, 
+    contributions: 0 
+  },
+  { 
+    id: 3, 
+    name: "401K RETIREMENT SAVINGS PLAN", 
+    number: "XXXX3321", 
+    goal: "RETIREMENT", 
+    type: "401K RETIREMENT SAVINGS PLAN", 
+    owner: "RICH", 
+    value: 441757.88, 
+    contributions: 20500 
+  },
+  { 
+    id: 4, 
+    name: "INDIVIDUAL - TOD", 
+    number: "XXXX5512", 
+    goal: "RETIREMENT", 
+    type: "INDIVIDUAL - TOD\nFidelity Go", 
+    owner: "RICH", 
+    value: 50.00, 
+    contributions: 0 
+  },
+  { 
+    id: 5, 
+    name: "INDIVIDUAL - TOD", 
+    number: "XXXX0562", 
+    goal: "RETIREMENT", 
+    type: "INDIVIDUAL - TOD\nSelf-Directed", 
+    owner: "RICH", 
+    value: 485742.99, 
+    contributions: 0 
+  },
+  { 
+    id: 6, 
+    name: "HEALTH SAVINGS ACCOUNT", 
+    number: "XXXX8430", 
+    goal: "RETIREMENT", 
+    type: "HEALTH SAVINGS ACCOUNT\nSelf-Directed", 
+    owner: "RICH", 
+    value: 4551.10, 
+    contributions: 3500 
+  },
+  { 
+    id: 7, 
+    name: "INDIVIDUAL - TOD", 
+    number: "XXXX4509", 
+    goal: "UNASSIGNED", 
+    type: "INDIVIDUAL - TOD\nSelf-Directed", 
+    owner: "RICH", 
+    value: 164681.94, 
+    contributions: 0 
+  },
+];
 
 const App: React.FC = () => {
-  // Default to 4 (Retirement Income) to show the new page
-  const [currentStep, setCurrentStep] = useState<number>(4);
+  const [currentStep, setCurrentStep] = useState<number>(0);
+
+  const [data, setData] = useState<AppData>({
+    household: {
+      name: "RICH WISE",
+      dob: "October 4, 1992",
+      income: 136750,
+      bonus: 21250,
+      partnerName: "MONEY WISE",
+      partnerDob: "January 1, 1994",
+      partnerIncome: 72000,
+      partnerBonus: 0,
+      planningWithPartner: true,
+    },
+    retirement: {
+      retirementAge: 69,
+      partnerRetirementAge: 67,
+      planToAge: 97,
+      state: "North Carolina",
+    },
+    expenses: {
+      method: 'monthly',
+      lifestyle: 'average',
+      essential: 10666,
+      nonEssential: 2666,
+      detailed: {
+        'Housing & mortgage': 0,
+        'Utilities': 0,
+        'Health care & insurance': 0,
+        'Transportation': 0,
+        'Personal': 0,
+        'Recreation': 0,
+        'Entertainment': 0,
+        'Custom expenses': 0,
+        'Family care': 0,
+      },
+    },
+    accounts: INITIAL_ACCOUNTS,
+    income: {
+      socialSecurity: {
+        amount: 3750, // Matches "First year of retirement" screenshot roughly
+        startAge: 67,
+        enabled: true,
+      },
+      pension: 0,
+      annuity: 0,
+      other: 0,
+      oneTime: 0,
+    }
+  });
+
+  const updateData = (updates: Partial<AppData>) => {
+    setData(prev => ({ ...prev, ...updates }));
+  };
 
   const nextStep = () => {
     setCurrentStep((prev) => Math.min(prev + 1, 5));
@@ -21,31 +147,30 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     if (currentStep === 0) {
-      return <HouseholdProfile onNext={nextStep} />;
+      return <HouseholdProfile data={data} updateData={updateData} onNext={nextStep} />;
     }
 
     if (currentStep === 1) {
-      return <RetirementProfile onNext={nextStep} onPrevious={prevStep} />;
+      return <RetirementProfile data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
     }
 
     if (currentStep === 2) {
-      return <RetirementExpenses onNext={nextStep} onPrevious={prevStep} />;
+      return <RetirementExpenses data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
     }
 
     if (currentStep === 3) {
-      return <AccountsPage onNext={nextStep} onPrevious={prevStep} />;
+      return <AccountsPage data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
     }
 
     if (currentStep === 4) {
-      return <RetirementIncome onNext={nextStep} onPrevious={prevStep} />;
+      return <RetirementIncome data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
     }
 
-    if (currentStep === 5) { // 'Your retirement analysis' is at index 5
-      return <AnalysisPage onNavigate={setCurrentStep} />;
+    if (currentStep === 5) {
+      return <AnalysisPage data={data} onNavigate={setCurrentStep} />;
     }
     
-    // Fallback
-    return <HouseholdProfile onNext={nextStep} />;
+    return <HouseholdProfile data={data} updateData={updateData} onNext={nextStep} />;
   };
 
   return (
