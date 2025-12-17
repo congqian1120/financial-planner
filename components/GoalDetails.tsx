@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wallet, MapPin, Banknote, Info, CheckCircle2, BookOpen, User, PieChart, X, AlertCircle } from 'lucide-react';
+import { Wallet, MapPin, Banknote, Info, CheckCircle2, BookOpen, User, PieChart, X, AlertCircle, ExternalLink, TrendingUp, FileText } from 'lucide-react';
 import { AppData } from '../types';
 import { calculateExpenses } from './RetirementExpenses';
 
@@ -10,6 +10,11 @@ interface GoalDetailsProps {
 
 const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showStrategiesModal, setShowStrategiesModal] = useState(false);
+  const [showInvestmentModal, setShowInvestmentModal] = useState(false);
+  const [showIncomeModal, setShowIncomeModal] = useState(false);
+  const [notImplementedFeature, setNotImplementedFeature] = useState<string | null>(null);
+
   const { retirement, accounts, household, income } = data;
 
   // Derived Calculations
@@ -20,6 +25,11 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate }) => {
   const expenses = calculateExpenses(data.expenses);
 
   const lifetimeIncome = income.socialSecurity.amount + income.pension + income.annuity;
+
+  const handleNotMockedClick = (e: React.MouseEvent, feature: string) => {
+    e.preventDefault();
+    setNotImplementedFeature(feature);
+  };
 
   return (
     <div className="mt-12 pt-12 border-t border-slate-200 relative">
@@ -168,7 +178,10 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate }) => {
             </div>
 
             <div className="mt-auto">
-               <button className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors w-full shadow-sm">
+               <button 
+                onClick={() => setShowStrategiesModal(true)}
+                className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors w-full shadow-sm"
+               >
                   Explore retirement savings strategies
                </button>
             </div>
@@ -187,7 +200,10 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate }) => {
             </div>
 
             <div className="mt-auto">
-               <button className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors w-full shadow-sm">
+               <button 
+                onClick={() => setShowInvestmentModal(true)}
+                className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors w-full shadow-sm"
+               >
                   Explore investment strategies
                </button>
             </div>
@@ -209,7 +225,10 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate }) => {
             </div>
 
             <div className="mt-auto">
-               <button className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors w-full shadow-sm">
+               <button 
+                onClick={() => setShowIncomeModal(true)}
+                className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors w-full shadow-sm"
+               >
                   Explore income strategies
                </button>
             </div>
@@ -256,6 +275,204 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate }) => {
              </button>
         </div>
       </div>
+
+      {/* STRATEGIES MODAL (Retirement Savings) */}
+      {showStrategiesModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[1px]" onClick={() => setShowStrategiesModal(false)}></div>
+            <div className="relative bg-white rounded-sm shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col animate-in fade-in zoom-in-95 duration-200">
+              <button 
+                  onClick={() => setShowStrategiesModal(false)} 
+                  className="absolute top-4 right-4 p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-500 z-10"
+              >
+                  <X size={24} strokeWidth={1.5} />
+              </button>
+              
+              <div className="p-8 md:p-10">
+                  <div className="flex items-start gap-5 mb-8">
+                    {/* Green Icon */}
+                    <div className="w-10 h-10 rounded-full bg-green-700 flex items-center justify-center shrink-0 mt-1">
+                        <TrendingUp size={20} className="text-white" />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-normal text-slate-800 mb-4">Explore changes that could improve your outlook</h2>
+                        <h3 className="font-bold text-slate-800 text-sm mb-2">Could a different approach to saving help improve your retirement outlook?</h3>
+                        <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                          The amount you save today may have a significant impact on your ability to meet expenses in retirement. Explore how a new savings strategy could change your outlook.
+                        </p>
+                        <button className="border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-700 font-bold py-2 px-6 rounded-full text-sm transition-colors">
+                          Explore savings strategies
+                        </button>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-200 pt-8">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center shrink-0">
+                          <FileText size={16} className="text-white" />
+                        </div>
+                        <h2 className="text-xl font-normal text-slate-800">Consider updates to your plan</h2>
+                    </div>
+
+                    <div className="pl-12 space-y-8">
+                        <div>
+                          <h4 className="font-bold text-slate-800 text-sm mb-1">Learn about automatic contributions</h4>
+                          <p className="text-slate-600 text-sm leading-relaxed mb-2">
+                              Setting up automatic investments from either an outside account or a Fidelity account can help you become a more consistent saver.
+                          </p>
+                          <a href="#" onClick={(e) => handleNotMockedClick(e, 'Automatic contributions')} className="text-blue-700 text-sm hover:underline inline-flex items-center gap-1 font-medium decoration-1 underline-offset-2">
+                              About automatic contributions <ExternalLink size={14} />
+                          </a>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-slate-800 text-sm mb-1">Manage your workplace contributions</h4>
+                          <p className="text-slate-600 text-sm leading-relaxed mb-2">
+                              View or update your existing contributions.
+                          </p>
+                          <a href="#" onClick={(e) => handleNotMockedClick(e, 'Workplace contributions')} className="text-blue-700 text-sm hover:underline inline-flex items-center gap-1 font-medium decoration-1 underline-offset-2">
+                              Manage workplace contributions <ExternalLink size={14} />
+                          </a>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-bold text-slate-800 text-sm mb-1">Consider opening an account</h4>
+                          <p className="text-slate-600 text-sm leading-relaxed mb-2">
+                              Explore our different account options to see which ones might meet your needs
+                          </p>
+                          <a href="#" onClick={(e) => handleNotMockedClick(e, 'Open an account')} className="text-blue-700 text-sm hover:underline inline-flex items-center gap-1 font-medium decoration-1 underline-offset-2">
+                              Open an account <ExternalLink size={14} />
+                          </a>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-slate-800 text-sm mb-1">Find out how to transfer assets</h4>
+                          <p className="text-slate-600 text-sm leading-relaxed mb-2">
+                              It's a simple way you could move money from an outside account to Fidelity.
+                          </p>
+                          <a href="#" onClick={(e) => handleNotMockedClick(e, 'Transfer assets')} className="text-blue-700 text-sm hover:underline inline-flex items-center gap-1 font-medium decoration-1 underline-offset-2">
+                              How to transfer assets <ExternalLink size={14} />
+                          </a>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-slate-800 text-sm mb-1">See how direct deposit could simplify your finances</h4>
+                          <p className="text-slate-600 text-sm leading-relaxed mb-2">
+                              Learn how to set up direct deposit with your payroll provider
+                          </p>
+                          <a href="#" onClick={(e) => handleNotMockedClick(e, 'Direct deposit')} className="text-blue-700 text-sm hover:underline inline-flex items-center gap-1 font-medium decoration-1 underline-offset-2">
+                              How to set up direct deposit <ExternalLink size={14} />
+                          </a>
+                        </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+      )}
+
+      {/* INVESTMENT MODAL (New) */}
+      {showInvestmentModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[1px]" onClick={() => setShowInvestmentModal(false)}></div>
+            <div className="relative bg-white rounded-sm shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col animate-in fade-in zoom-in-95 duration-200">
+              <button 
+                  onClick={() => setShowInvestmentModal(false)} 
+                  className="absolute top-4 right-4 p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-500 z-10"
+              >
+                  <X size={24} strokeWidth={1.5} />
+              </button>
+              
+              <div className="p-8 md:p-10">
+                  <div className="flex items-start gap-5 mb-8">
+                    {/* Green Icon */}
+                    <div className="w-10 h-10 rounded-full bg-green-700 flex items-center justify-center shrink-0 mt-1">
+                        <PieChart size={20} className="text-white" />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-normal text-slate-800 mb-4">Explore changes that could improve your outlook</h2>
+                        <h3 className="font-bold text-slate-800 text-sm mb-2">How could a different asset mix impact your plan?</h3>
+                        <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                          Before making adjustments to the way you're invested, you can use this tool to explore the potential impact of changes to your plan.
+                        </p>
+                        <button className="border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-700 font-bold py-2 px-6 rounded-full text-sm transition-colors">
+                          View options
+                        </button>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-200 pt-8">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center shrink-0">
+                          <FileText size={16} className="text-white" />
+                        </div>
+                        <h2 className="text-xl font-normal text-slate-800">Consider updates to your plan</h2>
+                    </div>
+
+                    <div className="pl-12 space-y-8">
+                        <div>
+                          <h4 className="font-bold text-slate-800 text-sm mb-1">Explore investment strategies</h4>
+                          <p className="text-slate-600 text-sm leading-relaxed mb-2">
+                              Find out how you might invest toward your goals. If you choose to select a strategy, we can help you choose investments to bring it to life.
+                          </p>
+                          <a href="#" onClick={(e) => handleNotMockedClick(e, 'Investment strategies')} className="text-blue-700 text-sm hover:underline inline-flex items-center gap-1 font-medium decoration-1 underline-offset-2">
+                              Get started <ExternalLink size={14} />
+                          </a>
+                        </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+      )}
+
+      {/* INCOME MODAL (New) */}
+      {showIncomeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[1px]" onClick={() => setShowIncomeModal(false)}></div>
+            <div className="relative bg-white rounded-sm shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col animate-in fade-in zoom-in-95 duration-200">
+              <button 
+                  onClick={() => setShowIncomeModal(false)} 
+                  className="absolute top-4 right-4 p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-500 z-10"
+              >
+                  <X size={24} strokeWidth={1.5} />
+              </button>
+              
+              <div className="p-8 md:p-10">
+                  <div className="">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center shrink-0">
+                          <FileText size={16} className="text-white" />
+                        </div>
+                        <h2 className="text-xl font-normal text-slate-800">Consider updates to your plan</h2>
+                    </div>
+
+                    <div className="pl-12 space-y-8">
+                        <div>
+                          <h4 className="font-bold text-slate-800 text-sm mb-1">Learn about bond ladders</h4>
+                          <p className="text-slate-600 text-sm leading-relaxed mb-2">
+                              Adding a bond ladder to your plan could help provide more consistent income in retirement while potentially helping you manage the risk of changing interest rates and stock market volatility.
+                          </p>
+                          <a href="#" onClick={(e) => handleNotMockedClick(e, 'Bond ladders')} className="text-blue-700 text-sm hover:underline inline-flex items-center gap-1 font-medium decoration-1 underline-offset-2">
+                              About bond ladders <ExternalLink size={14} />
+                          </a>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-slate-800 text-sm mb-1">Explore annuities</h4>
+                          <p className="text-slate-600 text-sm leading-relaxed mb-2">
+                              Adding an annuity to your plan could help supplement your retirement income. A Fidelity advisor can show you how annuities might fit into your plan.
+                          </p>
+                          <a href="#" onClick={(e) => handleNotMockedClick(e, 'Annuities')} className="text-blue-700 text-sm hover:underline inline-flex items-center gap-1 font-medium decoration-1 underline-offset-2">
+                              About annuities <ExternalLink size={14} />
+                          </a>
+                        </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+      )}
 
       {/* RISK ASSESSMENT MODAL */}
       {isModalOpen && (
@@ -348,6 +565,28 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate }) => {
              </div>
           </div>
         </div>
+      )}
+
+      {/* NOT IMPLEMENTED MODAL */}
+      {notImplementedFeature && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={() => setNotImplementedFeature(null)}></div>
+            <div className="relative bg-white rounded-sm shadow-2xl w-full max-w-sm p-8 animate-in fade-in zoom-in-95 duration-200 flex flex-col items-center text-center border border-slate-200">
+                 <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-500">
+                    <AlertCircle size={24} />
+                 </div>
+                 <h3 className="text-lg font-bold text-slate-800 mb-2">Page Not Mocked</h3>
+                 <p className="text-slate-600 text-sm mb-6 leading-relaxed">
+                    The <span className="font-semibold">"{notImplementedFeature}"</span> page is not available in this demo version.
+                 </p>
+                 <button 
+                    onClick={() => setNotImplementedFeature(null)}
+                    className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-6 rounded-full text-sm transition-colors w-full"
+                 >
+                    Go Back
+                 </button>
+            </div>
+          </div>
       )}
     </div>
   );
