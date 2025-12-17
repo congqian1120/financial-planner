@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { AppData } from '../types';
 import ContributionModeling, { ContributionState } from './ContributionModeling';
 import ModeledContributionStrategy from './ModeledContributionStrategy';
+import ModeledContributionTable from './ModeledContributionTable';
 
 interface RetirementSavingsStrategyProps {
   data: AppData;
@@ -216,6 +217,11 @@ const RetirementSavingsStrategy: React.FC<RetirementSavingsStrategyProps> = ({ d
       />
 
       <ModeledContributionStrategy 
+        currentBreakdown={{ taxDeferred, taxable, taxExempt, hsa }}
+        additionalContribution={additionalMonthly}
+      />
+
+      <ModeledContributionTable 
         currentBreakdown={{ taxDeferred, taxable, taxExempt, hsa }}
         additionalContribution={additionalMonthly}
       />
