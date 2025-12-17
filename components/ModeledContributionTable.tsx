@@ -11,11 +11,13 @@ interface Breakdown {
 interface ModeledContributionTableProps {
   currentBreakdown: Breakdown;
   additionalContribution: number;
+  onUpdatePlan: () => void;
 }
 
 const ModeledContributionTable: React.FC<ModeledContributionTableProps> = ({ 
   currentBreakdown, 
-  additionalContribution 
+  additionalContribution,
+  onUpdatePlan
 }) => {
   const nextYear = new Date().getFullYear() + 1;
 
@@ -113,7 +115,10 @@ const ModeledContributionTable: React.FC<ModeledContributionTableProps> = ({
       </div>
 
       <div className="flex justify-end pb-8">
-        <button className="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-6 rounded-full text-sm transition-colors shadow-sm flex items-center gap-2">
+        <button 
+          onClick={onUpdatePlan}
+          className="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-6 rounded-full text-sm transition-colors shadow-sm flex items-center gap-2"
+        >
           Update my plan
         </button>
       </div>

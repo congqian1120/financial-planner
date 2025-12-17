@@ -224,6 +224,7 @@ const RetirementSavingsStrategy: React.FC<RetirementSavingsStrategyProps> = ({ d
       <ModeledContributionTable 
         currentBreakdown={{ taxDeferred, taxable, taxExempt, hsa }}
         additionalContribution={additionalMonthly}
+        onUpdatePlan={() => onNavigate(3)}
       />
     </div>
   );
