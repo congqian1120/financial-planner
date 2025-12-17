@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Info, X } from 'lucide-react';
-import { PROJECTION_DATA } from '../constants';
-import { ProjectionType } from '../types';
+import { ProjectionType, ProjectionData } from '../types';
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('en-US', {
@@ -13,11 +12,19 @@ const formatCurrency = (value: number) => {
 
 interface SummaryFooterProps {
   projectionType: ProjectionType;
+  projectionData: ProjectionData[];
 }
 
-const SummaryFooter: React.FC<SummaryFooterProps> = ({ projectionType = ProjectionType.ASSET_PROJECTION }) => {
+const SummaryFooter: React.FC<SummaryFooterProps> = ({ 
+  projectionType = ProjectionType.ASSET_PROJECTION,
+  projectionData 
+}) => {
   const [showModal, setShowModal] = useState(false);
-  const finalData = PROJECTION_DATA[PROJECTION_DATA.length - 1];
+  
+  // Guard against empty data
+  if (!projectionData || projectionData.length === 0) return null;
+
+  const finalData = projectionData[projectionData.length - 1];
 
   if (projectionType === ProjectionType.MONTHLY_CASH_FLOW || projectionType === ProjectionType.YEARLY_CASH_FLOW) {
     return null;

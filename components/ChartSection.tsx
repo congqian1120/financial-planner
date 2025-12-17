@@ -13,8 +13,8 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { Info, X } from 'lucide-react';
-import { ProjectionData, ProjectionType } from '../types';
-import { PROJECTION_DATA, YEARLY_CASH_FLOW_DATA, RETIREMENT_YEAR, CHART_COLORS } from '../constants';
+import { ProjectionData, CashFlowData, ProjectionType } from '../types';
+import { CHART_COLORS, CURRENT_YEAR } from '../constants';
 
 // Custom Label for the Reference Line to match the vertical text style
 const CustomReferenceLabel = (props: any) => {
@@ -72,10 +72,22 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 interface ChartSectionProps {
   projectionType?: ProjectionType;
+  projectionData: ProjectionData[];
+  cashFlowData: CashFlowData[];
+  retirementYear: number;
 }
 
-const ChartSection: React.FC<ChartSectionProps> = ({ projectionType = ProjectionType.ASSET_PROJECTION }) => {
+const ChartSection: React.FC<ChartSectionProps> = ({ 
+  projectionType = ProjectionType.ASSET_PROJECTION,
+  projectionData,
+  cashFlowData,
+  retirementYear
+}) => {
   const [showCashFlowModal, setShowCashFlowModal] = useState(false);
+  
+  // Determine start/end years from data for axis ticks
+  const startYear = projectionData.length > 0 ? projectionData[0].year : CURRENT_YEAR;
+  const endYear = projectionData.length > 0 ? projectionData[projectionData.length - 1].year : CURRENT_YEAR + 60;
 
   if (projectionType === ProjectionType.MONTHLY_CASH_FLOW) {
     return (
@@ -208,11 +220,14 @@ const ChartSection: React.FC<ChartSectionProps> = ({ projectionType = Projection
   }
 
   if (projectionType === ProjectionType.YEARLY_CASH_FLOW) {
+     const cfStartYear = cashFlowData.length > 0 ? cashFlowData[0].year : retirementYear;
+     const cfEndYear = cashFlowData.length > 0 ? cashFlowData[cashFlowData.length-1].year : retirementYear + 30;
+
      return (
         <div className="w-full h-[450px] bg-slate-50/50 p-4 rounded-sm border border-transparent">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
-              data={YEARLY_CASH_FLOW_DATA}
+              data={cashFlowData}
               margin={{
                 top: 20,
                 right: 30,
@@ -226,7 +241,9 @@ const ChartSection: React.FC<ChartSectionProps> = ({ projectionType = Projection
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: '#475569', fontSize: 13 }}
-                ticks={[2065, 2070, 2075, 2080, 2085, 2090]}
+                domain={[cfStartYear, cfEndYear]}
+                type="number"
+                tickCount={6}
                 padding={{ left: 10, right: 10 }}
               />
               <YAxis 
@@ -254,7 +271,7 @@ const ChartSection: React.FC<ChartSectionProps> = ({ projectionType = Projection
     <div className="w-full h-[450px] bg-slate-50/50 p-4 rounded-sm border border-transparent">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
-          data={PROJECTION_DATA}
+          data={projectionData}
           margin={{
             top: 20,
             right: 30,
@@ -268,7 +285,9 @@ const ChartSection: React.FC<ChartSectionProps> = ({ projectionType = Projection
             axisLine={false}
             tickLine={false}
             tick={{ fill: '#475569', fontSize: 13 }}
-            ticks={[2025, 2061, 2091]}
+            domain={[startYear, endYear]}
+            type="number"
+            ticks={[startYear, retirementYear, endYear]}
             padding={{ left: 10, right: 10 }}
           />
           <YAxis 
@@ -276,14 +295,12 @@ const ChartSection: React.FC<ChartSectionProps> = ({ projectionType = Projection
             tickLine={false}
             tick={{ fill: '#475569', fontSize: 13 }}
             tickFormatter={formatCurrencyAxis}
-            domain={[0, 80000000]}
-            ticks={[0, 20000000, 40000000, 60000000, 80000000]}
             orientation="right"
           />
           <Tooltip content={<CustomTooltip />} />
           
           <ReferenceLine 
-            x={RETIREMENT_YEAR} 
+            x={retirementYear} 
             stroke="#0f172a" 
             strokeDasharray="0"
             label={<CustomReferenceLabel />}

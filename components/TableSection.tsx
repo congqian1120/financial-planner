@@ -1,5 +1,5 @@
 import React from 'react';
-import { PROJECTION_DATA } from '../constants';
+import { ProjectionData } from '../types';
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('en-US', {
@@ -9,7 +9,11 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-const TableSection: React.FC = () => {
+interface TableSectionProps {
+  projectionData: ProjectionData[];
+}
+
+const TableSection: React.FC<TableSectionProps> = ({ projectionData }) => {
   return (
     <div className="w-full h-[450px] overflow-auto border border-slate-200 rounded-sm">
       <table className="w-full text-sm text-left text-slate-600">
@@ -22,7 +26,7 @@ const TableSection: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {PROJECTION_DATA.map((row) => (
+          {projectionData.map((row) => (
             <tr key={row.year} className="bg-white border-b hover:bg-slate-50">
               <td className="px-6 py-4 font-medium text-slate-900">{row.year}</td>
               <td className="px-6 py-4">{formatCurrency(row.significantlyBelowAverage)}</td>

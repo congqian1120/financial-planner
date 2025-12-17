@@ -1,23 +1,30 @@
 import { ProjectionData, CashFlowData } from './types';
 
-export const RETIREMENT_YEAR = 2061;
-export const START_YEAR = 2025;
-export const END_YEAR = 2091;
-export const INITIAL_ASSETS = 500000; // Starting with 500k
-export const ANNUAL_CONTRIBUTION = 20000; // Adding 20k/year
+export const CURRENT_YEAR = 2025;
+export const DEFAULT_CURRENT_AGE = 33;
 
 // Growth rates for different scenarios
 const RATE_AVG = 0.075;
 const RATE_BELOW = 0.055;
 const RATE_SIG_BELOW = 0.035;
 
-export const generateProjectionData = (): ProjectionData[] => {
-  const data: ProjectionData[] = [];
-  let currentAvg = INITIAL_ASSETS;
-  let currentBelow = INITIAL_ASSETS;
-  let currentSigBelow = INITIAL_ASSETS;
+export const generateProjectionData = (
+  currentAge: number, 
+  retirementAge: number, 
+  planToAge: number, 
+  totalSaved: number, 
+  annualContribution: number
+): ProjectionData[] => {
+  const startYear = CURRENT_YEAR;
+  const endYear = startYear + (planToAge - currentAge);
+  const retirementYear = startYear + (retirementAge - currentAge);
 
-  for (let year = START_YEAR; year <= END_YEAR; year++) {
+  const data: ProjectionData[] = [];
+  let currentAvg = totalSaved;
+  let currentBelow = totalSaved;
+  let currentSigBelow = totalSaved;
+
+  for (let year = startYear; year <= endYear; year++) {
     data.push({
       year,
       average: Math.round(currentAvg),
@@ -27,13 +34,13 @@ export const generateProjectionData = (): ProjectionData[] => {
 
     // Compound interest + contributions (simplified model)
     // Stop contributions after retirement year
-    if (year < RETIREMENT_YEAR) {
-        currentAvg = (currentAvg + ANNUAL_CONTRIBUTION) * (1 + RATE_AVG);
-        currentBelow = (currentBelow + ANNUAL_CONTRIBUTION) * (1 + RATE_BELOW);
-        currentSigBelow = (currentSigBelow + ANNUAL_CONTRIBUTION) * (1 + RATE_SIG_BELOW);
+    if (year < retirementYear) {
+        currentAvg = (currentAvg + annualContribution) * (1 + RATE_AVG);
+        currentBelow = (currentBelow + annualContribution) * (1 + RATE_BELOW);
+        currentSigBelow = (currentSigBelow + annualContribution) * (1 + RATE_SIG_BELOW);
     } else {
         // Post retirement draw down or just growth without contribution?
-        // The chart shows continued growth, implying investment returns > withdrawal or no withdrawal modeled
+        // The chart shows continued growth, implying investment returns > withdrawal or no withdrawal modeled for asset projection
         currentAvg = currentAvg * (1 + RATE_AVG);
         currentBelow = currentBelow * (1 + RATE_BELOW);
         currentSigBelow = currentSigBelow * (1 + RATE_SIG_BELOW);
@@ -42,17 +49,23 @@ export const generateProjectionData = (): ProjectionData[] => {
   return data;
 };
 
-export const PROJECTION_DATA = generateProjectionData();
+export const generateCashFlowData = (
+  currentAge: number,
+  retirementAge: number,
+  planToAge: number
+): CashFlowData[] => {
+  const startYear = CURRENT_YEAR;
+  const retirementYear = startYear + (retirementAge - currentAge);
+  const endYear = startYear + (planToAge - currentAge);
 
-export const generateCashFlowData = (): CashFlowData[] => {
   const data: CashFlowData[] = [];
   
-  for (let year = RETIREMENT_YEAR; year <= END_YEAR; year++) {
-    const isEarlyPhase = year < 2068;
+  for (let year = retirementYear; year <= endYear; year++) {
+    const isEarlyPhase = year < (retirementYear + 7);
     
-    // Base values based on visual approximation of the screenshot
+    // Base values based on visual approximation
     const baseExpenses = isEarlyPhase ? 180000 : 300000;
-    const expenses = baseExpenses + ((year - RETIREMENT_YEAR) * 1000) + (Math.sin(year) * 5000);
+    const expenses = baseExpenses + ((year - retirementYear) * 1000) + (Math.sin(year) * 5000);
     
     const fixedIncome = 40000; // Yellow bar component
     
@@ -62,7 +75,7 @@ export const generateCashFlowData = (): CashFlowData[] => {
         variableIncome = 140000 + (Math.random() * 10000);
     } else {
         // Jumps up significantly then fluctuates/grows
-        variableIncome = 320000 + ((year - 2068) * 5000) + (Math.random() * 40000 - 20000);
+        variableIncome = 320000 + ((year - (retirementYear + 7)) * 5000) + (Math.random() * 40000 - 20000);
     }
 
     data.push({
@@ -74,8 +87,6 @@ export const generateCashFlowData = (): CashFlowData[] => {
   }
   return data;
 };
-
-export const YEARLY_CASH_FLOW_DATA = generateCashFlowData();
 
 export const CHART_COLORS = {
   average: '#cbd5e1', // Slate 300
