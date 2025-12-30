@@ -6,9 +6,10 @@ interface HouseholdProfileProps {
   data: AppData;
   updateData: (updates: Partial<AppData>) => void;
   onNext?: () => void;
+  onPrevious?: () => void;
 }
 
-export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, updateData, onNext }) => {
+export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, updateData, onNext, onPrevious }) => {
   const [isBonusExpanded, setIsBonusExpanded] = useState(true);
   
   // Local edit states
@@ -256,7 +257,14 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
         </div>
 
         {/* Footer */}
-        <div className="border-t border-slate-200 p-4 bg-white flex justify-end sticky bottom-0 z-20">
+        <div className="border-t border-slate-200 p-4 bg-white flex justify-between sticky bottom-0 z-20">
+             <div>
+                 {onPrevious && (
+                     <button onClick={onPrevious} className="text-slate-600 font-bold py-2 px-8 hover:bg-slate-50 rounded-full transition-colors text-sm">
+                        Previous
+                    </button>
+                 )}
+             </div>
              <button onClick={onNext} className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2 px-8 rounded-full transition-colors shadow-sm text-sm">
                 Next
             </button>
