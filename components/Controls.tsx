@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
 import { ViewMode, ProjectionType } from '../types';
@@ -12,23 +13,20 @@ interface ControlsProps {
 const Controls: React.FC<ControlsProps> = ({ viewMode, setViewMode, projectionType, setProjectionType }) => {
   
   const renderDescription = () => {
-    if (projectionType === ProjectionType.MONTHLY_CASH_FLOW) {
+    const todayDollarsSpan = <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">today's dollars</span>;
+    const assetMixSpan = <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">your moderate asset mix</span>;
+    const marketSpan = <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">significantly below average market conditions</span>;
+
+    if (projectionType === ProjectionType.MONTHLY_CASH_FLOW || projectionType === ProjectionType.YEARLY_CASH_FLOW) {
       return (
         <p className="text-sm text-slate-700">
-          Displaying <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">significantly below average market conditions</span> in <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">today's dollars</span> using <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">your current asset mix</span>.
-        </p>
-      );
-    }
-    if (projectionType === ProjectionType.YEARLY_CASH_FLOW) {
-      return (
-        <p className="text-sm text-slate-700">
-          Displaying <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">significantly below average market conditions</span> in <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">today's dollars</span> using <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">your current asset mix</span>.
+          Displaying {marketSpan} in {todayDollarsSpan} using {assetMixSpan}.
         </p>
       );
     }
     return (
       <p className="text-sm text-slate-700">
-        Displaying <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">today's dollars</span> from today until end of plan using <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">your current asset mix</span>.
+        Displaying {todayDollarsSpan} from today until end of plan using {assetMixSpan}.
       </p>
     );
   };

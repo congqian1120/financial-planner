@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import Header from './Header';
 import Controls from './Controls';
@@ -22,8 +23,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
 
   const { household, retirement, accounts } = data;
 
-  // Calculate dynamic data for charts
-  const { projectionData, cashFlowData, retirementYear } = useMemo(() => {
+  // Calculate dynamic data for charts using the Fischer Equation-based Real Returns
+  const { projectionData, cashFlowData, retirementYear, summaryStats } = useMemo(() => {
     const totalSaved = accounts.filter(a => a.goal === 'RETIREMENT').reduce((sum, a) => sum + a.value, 0);
     const totalContributions = accounts.filter(a => a.goal === 'RETIREMENT').reduce((sum, a) => sum + a.contributions, 0);
 
@@ -46,8 +47,28 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
     
     const retYear = CURRENT_YEAR + (retirement.retirementAge - currentAge);
 
-    return { projectionData: projData, cashFlowData: flowData, retirementYear: retYear };
-  }, [household.dob, retirement.retirementAge, retirement.planToAge, accounts]);
+    // Calculate dynamic monthly income estimates for the summary (Today's Dollars)
+    // Using a safe withdrawal rate of 4% for "Estimated Income"
+    const finalYearData = projData[projData.length - 1];
+    const avgMonthlyIncome = Math.round((finalYearData.average * 0.04) / 12);
+    const belowAvgMonthlyIncome = Math.round((finalYearData.belowAverage * 0.04) / 12);
+    const sigBelowAvgMonthlyIncome = Math.round((finalYearData.significantlyBelowAverage * 0.04) / 12);
+    
+    // Estimate need from current expenses state
+    const monthlyNeed = data.expenses.essential + data.expenses.nonEssential;
+
+    return { 
+      projectionData: projData, 
+      cashFlowData: flowData, 
+      retirementYear: retYear,
+      summaryStats: {
+        avgMonthlyIncome,
+        belowAvgMonthlyIncome,
+        sigBelowAvgMonthlyIncome,
+        monthlyNeed
+      }
+    };
+  }, [data, accounts, household.dob, retirement.retirementAge, retirement.planToAge]);
 
   if (showSavingsStrategy) {
     return <RetirementSavingsStrategy data={data} onBack={() => setShowSavingsStrategy(false)} onNavigate={onNavigate} />;
@@ -72,6 +93,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
               projectionData={projectionData}
               cashFlowData={cashFlowData}
               retirementYear={retirementYear}
+              summaryStats={summaryStats}
             />
           ) : (
             <TableSection projectionData={projectionData} />
@@ -80,7 +102,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
 
         <SummaryFooter projectionType={projectionType} projectionData={projectionData} />
         
-        <HouseholdSummary data={data} />
+        <HouseholdSummary data={data} summaryStats={summaryStats} />
 
         <GoalDetails 
           data={data} 

@@ -12,10 +12,13 @@ const NOMINAL_AVG = 0.075;
 const NOMINAL_BELOW = 0.055;
 const NOMINAL_SIG_BELOW = 0.035;
 
-// Real growth rates (Nominal - Inflation) to reflect "Today's Dollars"
-const RATE_AVG = NOMINAL_AVG - INFLATION_RATE;         // 5.0% real return
-const RATE_BELOW = NOMINAL_BELOW - INFLATION_RATE;     // 3.0% real return
-const RATE_SIG_BELOW = NOMINAL_SIG_BELOW - INFLATION_RATE; // 1.0% real return
+/**
+ * Fischer Equation for Real Returns: (1 + Nominal) / (1 + Inflation) - 1
+ * This accurately reflects "Today's Dollars" (purchasing power).
+ */
+const RATE_AVG = (1 + NOMINAL_AVG) / (1 + INFLATION_RATE) - 1;
+const RATE_BELOW = (1 + NOMINAL_BELOW) / (1 + INFLATION_RATE) - 1;
+const RATE_SIG_BELOW = (1 + NOMINAL_SIG_BELOW) / (1 + INFLATION_RATE) - 1;
 
 export const generateProjectionData = (
   currentAge: number, 
@@ -42,13 +45,14 @@ export const generateProjectionData = (
     });
 
     // Compounding with real rates. 
-    // Contributions are assumed to stay constant in "Today's Dollars" (increasing with inflation in nominal terms).
+    // Contributions are assumed to stay constant in "Today's Dollars" 
+    // (i.e., they increase with inflation in nominal terms to maintain value).
     if (year < retirementYear) {
         currentAvg = (currentAvg + annualContribution) * (1 + RATE_AVG);
         currentBelow = (currentBelow + annualContribution) * (1 + RATE_BELOW);
         currentSigBelow = (currentSigBelow + annualContribution) * (1 + RATE_SIG_BELOW);
     } else {
-        // Post retirement (no contributions)
+        // Post retirement (no contributions, growth only)
         currentAvg = currentAvg * (1 + RATE_AVG);
         currentBelow = currentBelow * (1 + RATE_BELOW);
         currentSigBelow = currentSigBelow * (1 + RATE_SIG_BELOW);
@@ -69,16 +73,20 @@ export const generateCashFlowData = (
   const data: CashFlowData[] = [];
   
   for (let year = retirementYear; year <= endYear; year++) {
+    // Early retirement often has higher spending (travel/hobbies)
     const isEarlyPhase = year < (retirementYear + 7);
-    const baseExpenses = isEarlyPhase ? 180000 : 300000;
-    const expenses = baseExpenses + ((year - retirementYear) * 1000) + (Math.sin(year) * 5000);
-    const fixedIncome = 40000;
+    
+    // Expenses in Today's Dollars (Real terms) - relatively flat
+    const baseExpenses = isEarlyPhase ? 165000 : 155000;
+    const expenses = baseExpenses + (Math.sin(year) * 2000); // Slight variation
+    
+    const fixedIncome = 45000; // Social Security / Pension in today's dollars
     
     let variableIncome = 0;
     if (isEarlyPhase) {
-        variableIncome = 140000 + (Math.random() * 10000);
+        variableIncome = 130000 + (Math.random() * 5000);
     } else {
-        variableIncome = 320000 + ((year - (retirementYear + 7)) * 5000) + (Math.random() * 40000 - 20000);
+        variableIncome = 120000 + (Math.random() * 10000);
     }
 
     data.push({
