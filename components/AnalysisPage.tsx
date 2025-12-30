@@ -8,6 +8,7 @@ import SummaryFooter from './SummaryFooter';
 import HouseholdSummary from './HouseholdSummary';
 import GoalDetails from './GoalDetails';
 import RetirementSavingsStrategy from './RetirementSavingsStrategy';
+import AssetAllocationPage from './AssetAllocationPage';
 import { ViewMode, ProjectionType, AppData } from '../types';
 import { generateProjectionData, generateCashFlowData, CURRENT_YEAR, DEFAULT_CURRENT_AGE } from '../constants';
 
@@ -20,6 +21,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.CHART);
   const [projectionType, setProjectionType] = useState<ProjectionType>(ProjectionType.ASSET_PROJECTION);
   const [showSavingsStrategy, setShowSavingsStrategy] = useState(false);
+  const [showAssetAllocation, setShowAssetAllocation] = useState(false);
 
   const { household, retirement, accounts } = data;
 
@@ -87,6 +89,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
     return <RetirementSavingsStrategy data={data} onBack={() => setShowSavingsStrategy(false)} onNavigate={onNavigate} />;
   }
 
+  if (showAssetAllocation) {
+    return <AssetAllocationPage data={data} onBack={() => setShowAssetAllocation(false)} onNavigate={onNavigate} />;
+  }
+
   return (
     <div className="p-4 md:p-12 max-w-7xl mx-auto animate-in fade-in duration-500">
       <Header />
@@ -121,6 +127,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
           data={data} 
           onNavigate={onNavigate} 
           onExploreSavings={() => setShowSavingsStrategy(true)} 
+          onViewAssetAllocation={() => setShowAssetAllocation(true)}
         />
       </main>
     </div>

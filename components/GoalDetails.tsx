@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Wallet, MapPin, Banknote, Info, CheckCircle2, BookOpen, User, PieChart, X, AlertCircle, ExternalLink, TrendingUp, FileText } from 'lucide-react';
 import { AppData } from '../types';
@@ -7,9 +8,10 @@ interface GoalDetailsProps {
   data: AppData;
   onNavigate: (step: number) => void;
   onExploreSavings?: () => void;
+  onViewAssetAllocation?: () => void;
 }
 
-const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate, onExploreSavings }) => {
+const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate, onExploreSavings, onViewAssetAllocation }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showStrategiesModal, setShowStrategiesModal] = useState(false);
   const [showInvestmentModal, setShowInvestmentModal] = useState(false);
@@ -38,6 +40,15 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate, onExploreSa
       onExploreSavings();
     } else {
       setNotImplementedFeature("Retirement savings strategy");
+    }
+  };
+
+  const handleViewAssetAllocation = () => {
+    setShowInvestmentModal(false);
+    if (onViewAssetAllocation) {
+      onViewAssetAllocation();
+    } else {
+      setNotImplementedFeature("Asset allocation options");
     }
   };
 
@@ -408,7 +419,10 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate, onExploreSa
                         <p className="text-slate-600 text-sm leading-relaxed mb-6">
                           Before making adjustments to the way you're invested, you can use this tool to explore the potential impact of changes to your plan.
                         </p>
-                        <button className="border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-700 font-bold py-2 px-6 rounded-full text-sm transition-colors">
+                        <button 
+                            onClick={handleViewAssetAllocation}
+                            className="border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-700 font-bold py-2 px-6 rounded-full text-sm transition-colors"
+                        >
                           View options
                         </button>
                     </div>
