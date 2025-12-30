@@ -4,21 +4,24 @@ import { ProjectionData, CashFlowData } from './types';
 export const CURRENT_YEAR = 2025;
 export const DEFAULT_CURRENT_AGE = 33;
 
-// Inflation assumption (2.5% annual)
+// Simulation Configuration
+const NUM_TRIALS = 1000;
 const INFLATION_RATE = 0.025;
 
-// Nominal growth rates for different scenarios
-const NOMINAL_AVG = 0.075;
-const NOMINAL_BELOW = 0.055;
-const NOMINAL_SIG_BELOW = 0.035;
+// Moderate Asset Mix Assumptions (Real Returns)
+// Mean: ~4.5% real, Std Dev: ~11% (Typical for a 60/40 or 70/30 portfolio)
+const MEAN_REAL_RETURN = 0.045; 
+const VOLATILITY = 0.11;
 
 /**
- * Fischer Equation for Real Returns: (1 + Nominal) / (1 + Inflation) - 1
- * This accurately reflects "Today's Dollars" (purchasing power).
+ * Box-Muller transform to generate a random number from a normal distribution
+ * Mean = 0, StdDev = 1
  */
-const RATE_AVG = (1 + NOMINAL_AVG) / (1 + INFLATION_RATE) - 1;
-const RATE_BELOW = (1 + NOMINAL_BELOW) / (1 + INFLATION_RATE) - 1;
-const RATE_SIG_BELOW = (1 + NOMINAL_SIG_BELOW) / (1 + INFLATION_RATE) - 1;
+const gaussianRandom = () => {
+  const u = 1 - Math.random();
+  const v = 1 - Math.random();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+};
 
 export const generateProjectionData = (
   currentAge: number, 
@@ -28,36 +31,45 @@ export const generateProjectionData = (
   annualContribution: number
 ): ProjectionData[] => {
   const startYear = CURRENT_YEAR;
-  const endYear = startYear + (planToAge - currentAge);
-  const retirementYear = startYear + (retirementAge - currentAge);
+  const numYears = planToAge - currentAge;
+  const retirementYearOffset = retirementAge - currentAge;
 
-  const data: ProjectionData[] = [];
-  let currentAvg = totalSaved;
-  let currentBelow = totalSaved;
-  let currentSigBelow = totalSaved;
+  // Initialize 1000 trials
+  const trials: number[][] = Array.from({ length: NUM_TRIALS }, () => [totalSaved]);
 
-  for (let year = startYear; year <= endYear; year++) {
-    data.push({
-      year,
-      average: Math.round(currentAvg),
-      belowAverage: Math.round(currentBelow),
-      significantlyBelowAverage: Math.round(currentSigBelow),
-    });
-
-    // Compounding with real rates. 
-    // Contributions are assumed to stay constant in "Today's Dollars" 
-    // (i.e., they increase with inflation in nominal terms to maintain value).
-    if (year < retirementYear) {
-        currentAvg = (currentAvg + annualContribution) * (1 + RATE_AVG);
-        currentBelow = (currentBelow + annualContribution) * (1 + RATE_BELOW);
-        currentSigBelow = (currentSigBelow + annualContribution) * (1 + RATE_SIG_BELOW);
-    } else {
-        // Post retirement (no contributions, growth only)
-        currentAvg = currentAvg * (1 + RATE_AVG);
-        currentBelow = currentBelow * (1 + RATE_BELOW);
-        currentSigBelow = currentSigBelow * (1 + RATE_SIG_BELOW);
+  // Run the simulation year by year for all trials
+  for (let yearIdx = 1; yearIdx <= numYears; yearIdx++) {
+    for (let trialIdx = 0; trialIdx < NUM_TRIALS; trialIdx++) {
+      const prevBalance = trials[trialIdx][yearIdx - 1];
+      
+      // Generate a random return for this year (Stochastic component)
+      const randomReturn = MEAN_REAL_RETURN + (gaussianRandom() * VOLATILITY);
+      
+      // Accumulation vs Withdrawal phase
+      const contribution = yearIdx <= retirementYearOffset ? annualContribution : 0;
+      
+      // Compounding: (Balance + Contribution) * (1 + r)
+      const nextBalance = Math.max(0, (prevBalance + contribution) * (1 + randomReturn));
+      trials[trialIdx].push(nextBalance);
     }
   }
+
+  // Process the trials to find percentiles for each year
+  const data: ProjectionData[] = [];
+  for (let yearIdx = 0; yearIdx <= numYears; yearIdx++) {
+    const yearBalances = trials.map(t => t[yearIdx]).sort((a, b) => a - b);
+    
+    data.push({
+      year: startYear + yearIdx,
+      // 50th Percentile (Median) -> Average Market
+      average: Math.round(yearBalances[Math.floor(NUM_TRIALS * 0.50)]),
+      // 25th Percentile -> Below Average Market
+      belowAverage: Math.round(yearBalances[Math.floor(NUM_TRIALS * 0.25)]),
+      // 5th Percentile -> Significantly Below Average Market
+      significantlyBelowAverage: Math.round(yearBalances[Math.floor(NUM_TRIALS * 0.05)]),
+    });
+  }
+
   return data;
 };
 
@@ -73,14 +85,10 @@ export const generateCashFlowData = (
   const data: CashFlowData[] = [];
   
   for (let year = retirementYear; year <= endYear; year++) {
-    // Early retirement often has higher spending (travel/hobbies)
     const isEarlyPhase = year < (retirementYear + 7);
-    
-    // Expenses in Today's Dollars (Real terms) - relatively flat
     const baseExpenses = isEarlyPhase ? 165000 : 155000;
-    const expenses = baseExpenses + (Math.sin(year) * 2000); // Slight variation
-    
-    const fixedIncome = 45000; // Social Security / Pension in today's dollars
+    const expenses = baseExpenses + (Math.sin(year) * 2000);
+    const fixedIncome = 45000; 
     
     let variableIncome = 0;
     if (isEarlyPhase) {
@@ -100,7 +108,7 @@ export const generateCashFlowData = (
 };
 
 export const CHART_COLORS = {
-  average: '#cbd5e1', // Slate 300
-  belowAverage: '#64748b', // Slate 500
-  sigBelowAverage: '#0f172a', // Slate 900
+  average: '#cbd5e1', 
+  belowAverage: '#64748b', 
+  sigBelowAverage: '#0f172a', 
 };
