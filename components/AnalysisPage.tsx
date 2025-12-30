@@ -25,8 +25,19 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
 
   // Calculate dynamic data for charts using the Fischer Equation-based Real Returns
   const { projectionData, cashFlowData, retirementYear, summaryStats } = useMemo(() => {
-    const totalSaved = accounts.filter(a => a.goal === 'RETIREMENT').reduce((sum, a) => sum + a.value, 0);
-    const totalContributions = accounts.filter(a => a.goal === 'RETIREMENT').reduce((sum, a) => sum + a.contributions, 0);
+    // Filter accounts: if not planning with partner, exclude accounts owned by "MONEY" (partner)
+    const filteredAccounts = accounts.filter(acc => {
+        const isRetirementGoal = acc.goal === 'RETIREMENT';
+        if (!isRetirementGoal) return false;
+        
+        // If "Planning with partner" is OFF, exclude partner's accounts
+        if (!household.planningWithPartner && acc.owner === 'MONEY') return false;
+        
+        return true;
+    });
+
+    const totalSaved = filteredAccounts.reduce((sum, a) => sum + a.value, 0);
+    const totalContributions = filteredAccounts.reduce((sum, a) => sum + a.contributions, 0);
 
     const birthYear = new Date(household.dob).getFullYear();
     const currentAge = isNaN(birthYear) ? DEFAULT_CURRENT_AGE : (CURRENT_YEAR - birthYear);
@@ -48,14 +59,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
     const retYear = CURRENT_YEAR + (retirement.retirementAge - currentAge);
 
     // Calculate dynamic monthly income estimates for the summary (Today's Dollars)
-    // Using a safe withdrawal rate of 4% for "Estimated Income"
     const finalYearData = projData[projData.length - 1];
     const avgMonthlyIncome = Math.round((finalYearData.average * 0.04) / 12);
     const belowAvgMonthlyIncome = Math.round((finalYearData.belowAverage * 0.04) / 12);
     const sigBelowAvgMonthlyIncome = Math.round((finalYearData.significantlyBelowAverage * 0.04) / 12);
     
-    // Estimate need from current expenses state
-    const monthlyNeed = data.expenses.essential + data.expenses.nonEssential;
+    // Adjust "Monthly Need": If planning solo, assume expenses are 65% of the joint household expense
+    let monthlyNeed = data.expenses.essential + data.expenses.nonEssential;
+    if (!household.planningWithPartner) {
+        monthlyNeed = Math.round(monthlyNeed * 0.65);
+    }
 
     return { 
       projectionData: projData, 
@@ -68,7 +81,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate }) => {
         monthlyNeed
       }
     };
-  }, [data, accounts, household.dob, retirement.retirementAge, retirement.planToAge]);
+  }, [data, accounts, household.dob, household.planningWithPartner, retirement.retirementAge, retirement.planToAge]);
 
   if (showSavingsStrategy) {
     return <RetirementSavingsStrategy data={data} onBack={() => setShowSavingsStrategy(false)} onNavigate={onNavigate} />;

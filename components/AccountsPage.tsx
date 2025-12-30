@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { Plus, Check, Info, ChevronDown, ChevronsUpDown, X } from 'lucide-react';
 import { AppData, Account } from '../types';
 
@@ -10,7 +11,7 @@ interface AccountsPageProps {
 }
 
 const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, onPrevious }) => {
-  const { accounts } = data;
+  const { accounts, household } = data;
   const [editingId, setEditingId] = useState<number | null>(null);
   
   const [editValues, setEditValues] = useState<{
@@ -23,13 +24,26 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, o
       contributions: string;
   }>({ name: '', number: '', goal: '', type: '', owner: '', value: '', contributions: '' });
 
-  const totalBalance = accounts
-    .filter(a => a.goal === 'RETIREMENT')
-    .reduce((sum, a) => sum + a.value, 0);
+  // Filter accounts based on partner planning status
+  const visibleAccounts = useMemo(() => {
+    return accounts.filter(acc => {
+      // If planning solo, hide accounts owned by the partner (MONEY)
+      if (!household.planningWithPartner && acc.owner === 'MONEY') return false;
+      return true;
+    });
+  }, [accounts, household.planningWithPartner]);
 
-  const totalContributions = accounts
-    .filter(a => a.goal === 'RETIREMENT')
-    .reduce((sum, a) => sum + a.contributions, 0);
+  const totalBalance = useMemo(() => {
+    return visibleAccounts
+      .filter(a => a.goal === 'RETIREMENT')
+      .reduce((sum, a) => sum + a.value, 0);
+  }, [visibleAccounts]);
+
+  const totalContributions = useMemo(() => {
+    return visibleAccounts
+      .filter(a => a.goal === 'RETIREMENT')
+      .reduce((sum, a) => sum + a.contributions, 0);
+  }, [visibleAccounts]);
 
   const handleEditClick = (acc: Account) => {
     setEditingId(acc.id);
@@ -51,7 +65,6 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, o
           ...acc,
           goal: editValues.goal,
           contributions: parseFloat(editValues.contributions.replace(/,/g, '')) || 0,
-          // Only update other fields if outside account
           ...(acc.isOutside ? {
              name: editValues.name,
              number: editValues.number,
@@ -82,7 +95,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, o
           number: "XXXX",
           goal: "UNASSIGNED",
           type: "MANUAL",
-          owner: "RICH",
+          owner: household.name.split(' ')[0], // Default to primary user's first name
           value: 0,
           contributions: 0,
           isOutside: true
@@ -90,7 +103,6 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, o
       
       updateData({ accounts: [...accounts, newAccount] });
       
-      // Auto-edit the new account
       setEditingId(newId);
       setEditValues({
           name: newAccount.name,
@@ -103,7 +115,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, o
       });
   };
 
-  const renderTable = (data: Account[], isOutside: boolean) => (
+  const renderTable = (accountsToRender: Account[], isOutside: boolean) => (
       <div className="overflow-x-auto border border-slate-300 rounded-sm">
         <table className="w-full text-left border-collapse min-w-[900px]">
              <thead>
@@ -142,7 +154,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, o
                 </tr>
             </thead>
             <tbody>
-                {data.map((acc, idx) => {
+                {accountsToRender.map((acc, idx) => {
                     const isEditing = editingId === acc.id;
                     return (
                     <tr key={acc.id} className={`border-b border-slate-300 transition-colors ${idx % 2 === 0 ? 'bg-[#f0f6fc]/30' : 'bg-white'} ${isEditing ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}>
@@ -299,7 +311,9 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, o
                 <div className="bg-white p-6 rounded-sm border border-slate-200 border-l-4 border-l-green-700 shadow-sm">
                     <h3 className="font-bold text-slate-700 text-sm mb-4">Assigned retirement balance</h3>
                     <div className="text-3xl font-normal text-slate-900 mb-2">${totalBalance.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
-                    <div className="text-sm text-slate-500">from {accounts.filter(a => a.goal === 'RETIREMENT').length} out of {accounts.length} accounts</div>
+                    <div className="text-sm text-slate-500">
+                      from {visibleAccounts.filter(a => a.goal === 'RETIREMENT').length} out of {visibleAccounts.length} accounts
+                    </div>
                 </div>
 
                 {/* Card 2 */}
@@ -358,7 +372,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, o
                      This is a list of your accounts at Fidelity. If you would like to update contributions or account assignment you can do so by clicking on Edit.
                  </p>
                  
-                 {renderTable(accounts.filter(a => !a.isOutside), false)}
+                 {renderTable(visibleAccounts.filter(a => !a.isOutside), false)}
             </div>
 
             {/* Accounts outside of Fidelity */}
@@ -373,7 +387,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, o
                      These are all of the non-Fidelity accounts that you've told us about.
                  </p>
                  
-                 {accounts.filter(a => a.isOutside).length === 0 ? (
+                 {visibleAccounts.filter(a => a.isOutside).length === 0 ? (
                      <div className="bg-slate-50 border border-slate-200 rounded-sm p-6 mb-4">
                          <p className="font-bold text-slate-700 text-sm">
                             You haven't linked or included any non-Fidelity accounts yet.
@@ -381,7 +395,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ data, updateData, onNext, o
                      </div>
                  ) : (
                      <div className="mb-4">
-                        {renderTable(accounts.filter(a => a.isOutside), true)}
+                        {renderTable(visibleAccounts.filter(a => a.isOutside), true)}
                      </div>
                  )}
 

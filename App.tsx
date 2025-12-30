@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import AnalysisPage from './components/AnalysisPage';
@@ -17,7 +18,7 @@ const INITIAL_ACCOUNTS: Account[] = [
     type: "ROTH IRA\nSelf-Directed", 
     owner: "RICH", 
     value: 59284.43, 
-    contributions: 0 
+    contributions: 2400 
   },
   { 
     id: 2, 
@@ -41,13 +42,13 @@ const INITIAL_ACCOUNTS: Account[] = [
   },
   { 
     id: 4, 
-    name: "INDIVIDUAL - TOD", 
-    number: "XXXX5512", 
+    name: "401K SAVINGS PLAN", 
+    number: "XXXX8822", 
     goal: "RETIREMENT", 
-    type: "INDIVIDUAL - TOD\nFidelity Go", 
-    owner: "RICH", 
-    value: 50.00, 
-    contributions: 0 
+    type: "401K RETIREMENT SAVINGS PLAN", 
+    owner: "MONEY", // Partner account
+    value: 312450.00, 
+    contributions: 15000 
   },
   { 
     id: 5, 
@@ -71,13 +72,13 @@ const INITIAL_ACCOUNTS: Account[] = [
   },
   { 
     id: 7, 
-    name: "INDIVIDUAL - TOD", 
-    number: "XXXX4509", 
-    goal: "UNASSIGNED", 
-    type: "INDIVIDUAL - TOD\nSelf-Directed", 
-    owner: "RICH", 
-    value: 164681.94, 
-    contributions: 0 
+    name: "ROTH IRA", 
+    number: "XXXX1122", 
+    goal: "RETIREMENT", 
+    type: "ROTH IRA\nSelf-Directed", 
+    owner: "MONEY", // Partner account
+    value: 42100.00, 
+    contributions: 6000 
   },
 ];
 
@@ -94,7 +95,7 @@ const App: React.FC = () => {
       partnerDob: "January 1, 1994",
       partnerIncome: 72000,
       partnerBonus: 0,
-      planningWithPartner: true,
+      planningWithPartner: false, // Changed to false by default as requested
     },
     retirement: {
       retirementAge: 69,
@@ -122,7 +123,7 @@ const App: React.FC = () => {
     accounts: INITIAL_ACCOUNTS,
     income: {
       socialSecurity: {
-        amount: 3750, // Matches "First year of retirement" screenshot roughly
+        amount: 3750, 
         startAge: 67,
         enabled: true,
       },
