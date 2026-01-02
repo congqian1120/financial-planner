@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, Info, ExternalLink, HelpCircle, Star, ChevronRight, ChevronsUpDown } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, Cell as BarCell, ReferenceLine } from 'recharts';
+import { ArrowLeft, Info, ExternalLink, HelpCircle, Star, ChevronRight, ChevronsUpDown, ChevronDown } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, Cell as BarCell, ReferenceLine, Tooltip } from 'recharts';
 import { AppData, Account } from '../types';
 
 interface AssetAllocationPageProps {
@@ -31,13 +31,60 @@ const ASSET_CLASSES = [
 ];
 
 const HISTORICAL_RETURNS_DATA = [
-  { period: '1 year', max: 136.07, min: -60.78 },
-  { period: '5 years', max: 31.91, min: -13.78 },
-  { period: '10 years', max: 19.19, min: -2.69 },
-  { period: '15 years', max: 17.85, min: 0.91 },
-  { period: '20 years', max: 16.49, min: 2.66 },
-  { period: '25 years', max: 15.79, min: 5.7 },
+  { period: '1 year', max: 136.07, min: -60.78, maxYear: '1932-1933', minYear: '1931-1932' },
+  { period: '5 years', max: 31.91, min: -13.78, maxYear: '1928-1933', minYear: '1926-1931' },
+  { period: '10 years', max: 19.19, min: -2.69, maxYear: '1949-1959', minYear: '1929-1939' },
+  { period: '15 years', max: 17.85, min: 0.91, maxYear: '1984-1999', minYear: '1929-1944' },
+  { period: '20 years', max: 16.49, min: 2.66, maxYear: '1980-2000', minYear: '1929-1949' },
+  { period: '25 years', max: 15.79, min: 5.7, maxYear: '1975-2000', minYear: '1929-1954' },
 ];
+
+const COMPARISON_DATA = {
+  '1 year': [
+    { mix: 'Short-term', max: 15.2, min: -0.04 },
+    { mix: 'Conservative', max: 31.06, min: -17.67 },
+    { mix: 'Moderate with income', max: 45.78, min: -25.99 },
+    { mix: 'Moderate', max: 60.79, min: -33.62 },
+    { mix: 'Balanced', max: 76.57, min: -40.64 },
+    { mix: 'Growth with income', max: 93.08, min: -47.07 },
+    { mix: 'Growth', max: 109.55, min: -52.92 },
+    { mix: 'Aggressive growth', max: 136.07, min: -60.78 },
+    { mix: 'Most aggressive', max: 162.89, min: -67.56 },
+  ],
+  '5 years': [
+    { mix: 'Short-term', max: 11.5, min: 2.1 },
+    { mix: 'Conservative', max: 18.2, min: -4.5 },
+    { mix: 'Moderate with income', max: 21.4, min: -6.8 },
+    { mix: 'Moderate', max: 24.1, min: -8.9 },
+    { mix: 'Balanced', max: 26.5, min: -10.5 },
+    { mix: 'Growth with income', max: 28.3, min: -11.4 },
+    { mix: 'Growth', max: 30.1, min: -12.6 },
+    { mix: 'Aggressive growth', max: 31.91, min: -13.78 },
+    { mix: 'Most aggressive', max: 35.8, min: -15.4 },
+  ],
+};
+
+const CustomHistoricalTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-white border border-slate-300 p-4 shadow-xl rounded-sm text-xs pointer-events-none min-w-[200px]">
+        <p className="font-bold mb-3 text-slate-800 text-[13px]">{label}</p>
+        <div className="space-y-1.5">
+          <div className="flex gap-1.5">
+            <span className="text-slate-600 font-medium">Highest:</span>
+            <span className="font-bold text-slate-900">+{data.max}% {data.maxYear ? `(${data.maxYear})` : ''}</span>
+          </div>
+          <div className="flex gap-1.5">
+            <span className="text-slate-600 font-medium">Lowest:</span>
+            <span className="font-bold text-slate-900">{data.min}% {data.minYear ? `(${data.minYear})` : ''}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack, onNavigate }) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -45,6 +92,7 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
   const [selectedStrategy, setSelectedStrategy] = useState('Aggressive growth');
   const [isLoading, setIsLoading] = useState(true);
   const [historicalViewMode, setHistoricalViewMode] = useState<'Chart' | 'Table'>('Chart');
+  const [comparisonPeriod, setComparisonPeriod] = useState<'1 year' | '5 years'>('1 year');
 
   const { accounts, household } = data;
 
@@ -234,6 +282,14 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
           hasNegative: d.min < 0
       }));
   }, []);
+
+  const transformedComparisonData = useMemo(() => {
+    return COMPARISON_DATA[comparisonPeriod].map(d => ({
+      ...d,
+      posRange: [Math.max(0, d.min), d.max],
+      negRange: [d.min, Math.min(0, d.max)]
+    }));
+  }, [comparisonPeriod]);
 
   return (
     <div className="bg-white min-h-screen animate-in fade-in duration-300 pb-24">
@@ -439,11 +495,6 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
         )}
 
         <div className="mt-24 border-t border-slate-200 pt-16">
-            <ul className="list-disc pl-5 space-y-4 text-xs text-slate-500 mb-12 max-w-4xl italic">
-                <li>Diversification and asset allocation do not ensure a profit or guarantee against loss.</li>
-                <li>At least one of the accounts assigned to your retirement plan is professionally managed.</li>
-            </ul>
-
             <div className="border-b border-slate-300 flex flex-wrap gap-10 mb-8">
                 {['Current allocation by account', 'Current & target comparisons', "Target's historical returns", "Target's historical return comparison"].map((tab) => (
                     <button 
@@ -458,15 +509,6 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
 
             {subTab === 'Current allocation by account' && (
                 <div className="animate-in fade-in duration-500">
-                    <div className="flex flex-wrap gap-4 mb-6 items-baseline">
-                        <span className="text-[11px] text-slate-400 font-bold uppercase tracking-tight">Account labels</span>
-                        <div className="flex flex-wrap gap-x-6 gap-y-2">
-                            {['(EC) Equity compensation', '(FV) Full View®', '(GB) Goal Booster', '(MA) Managed account', '(M) Manual', '(RE) Roth eligible'].map(label => (
-                                <span key={label} className="text-[11px] text-slate-500 font-medium">{label}</span>
-                            ))}
-                        </div>
-                    </div>
-
                     <div className="overflow-x-auto border border-slate-200 rounded-sm shadow-sm">
                         <table className="w-full text-left border-collapse min-w-[1000px]">
                             <thead className="bg-[#f8fafc] border-b border-slate-200">
@@ -629,6 +671,8 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
                                           
                                           {/* Zero Baseline */}
                                           <ReferenceLine y={0} stroke="#e2e8f0" strokeWidth={1} />
+                                          
+                                          <Tooltip content={<CustomHistoricalTooltip />} cursor={{fill: 'transparent'}} />
 
                                           {/* Positive Part (Green) - Flows from max(0, min) to max */}
                                           <Bar dataKey="posRange" radius={[2, 2, 0, 0]} barSize={55}>
@@ -690,6 +734,99 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
                             </table>
                         </div>
                     )}
+                </div>
+            )}
+
+            {subTab === "Target's historical return comparison" && (
+                <div className="animate-in fade-in duration-500">
+                     <div className="w-full max-w-5xl text-center space-y-4 mb-12">
+                        <h2 className="text-xl font-normal text-slate-800">Best/worst index returns by asset mix for selected time period from 1926-2024</h2>
+                        <p className="text-sm text-slate-600">Select a different amount of time assets are held to compare index returns across model asset mixes below.</p>
+                    </div>
+
+                    <div className="flex items-center gap-4 mb-12">
+                        <span className="text-sm font-bold text-slate-700">Time period</span>
+                        <div className="relative inline-block w-40">
+                            <select 
+                                value={comparisonPeriod}
+                                onChange={(e) => setComparisonPeriod(e.target.value as any)}
+                                className="w-full appearance-none bg-white border border-slate-300 hover:border-slate-400 text-slate-700 py-2 px-4 pr-8 rounded-sm leading-tight focus:outline-none shadow-sm cursor-pointer text-sm font-medium"
+                            >
+                                <option value="1 year">1 year</option>
+                                <option value="5 years">5 years</option>
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+                                <ChevronDown size={16} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="w-full max-w-6xl h-[520px] flex flex-row mt-12">
+                        <div className="flex-1 flex flex-col relative">
+                            <div className="flex-1 relative">
+                                 {/* Y Axis Vertical Legend */}
+                                 <div className="absolute -left-16 top-1/2 -translate-y-1/2 -rotate-90 text-[12px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Annualized return (%)</div>
+                                 
+                                 <ResponsiveContainer width="100%" height="100%">
+                                      <BarChart
+                                          data={transformedComparisonData}
+                                          margin={{ top: 40, right: 30, left: 20, bottom: 100 }}
+                                          barGap={-40}
+                                      >
+                                          <YAxis 
+                                              domain={[-80, 180]} 
+                                              ticks={[-68, 0, 163]} 
+                                              axisLine={false} 
+                                              tickLine={false} 
+                                              tick={{ fill: '#64748b', fontSize: 13, fontWeight: 500 }}
+                                              tickFormatter={(val) => `${val}%`}
+                                              orientation="left"
+                                              width={80}
+                                          />
+                                          
+                                          <XAxis 
+                                              dataKey="mix" 
+                                              axisLine={{ stroke: '#e2e8f0' }} 
+                                              tickLine={false} 
+                                              tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700, angle: -45, textAnchor: 'end' }} 
+                                              padding={{ left: 20, right: 20 }}
+                                              interval={0}
+                                          />
+                                          
+                                          <ReferenceLine y={0} stroke="#e2e8f0" strokeWidth={1} />
+                                          <Tooltip content={<CustomHistoricalTooltip />} cursor={{fill: 'transparent'}} />
+
+                                          {/* Positive Part (Green) */}
+                                          <Bar dataKey="posRange" radius={[2, 2, 0, 0]} barSize={40}>
+                                              {transformedComparisonData.map((entry, index) => (
+                                                  <BarCell key={`pos-cell-${index}`} fill="#14532d" />
+                                              ))}
+                                              <LabelList 
+                                                  dataKey="posRange" 
+                                                  position="top" 
+                                                  formatter={(val: [number, number]) => `+${val[1]}%`} 
+                                                  style={{ fontSize: '10px', fontWeight: 'bold', fill: '#1e293b' }} 
+                                              />
+                                          </Bar>
+
+                                          {/* Negative Part (Red) */}
+                                          <Bar dataKey="negRange" radius={0} barSize={40}>
+                                              {transformedComparisonData.map((entry, index) => (
+                                                  <BarCell key={`neg-cell-${index}`} fill="#7f1d1d" />
+                                              ))}
+                                              <LabelList 
+                                                  dataKey="negRange" 
+                                                  position="bottom" 
+                                                  formatter={(val: [number, number]) => `${val[0]}%`} 
+                                                  style={{ fontSize: '10px', fontWeight: 'bold', fill: '#1e293b' }} 
+                                              />
+                                          </Bar>
+                                      </BarChart>
+                                 </ResponsiveContainer>
+                            </div>
+                            <div className="text-center text-[12px] text-slate-700 font-bold uppercase tracking-tight mt-[-60px] ml-[100px]">Asset mix</div>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
