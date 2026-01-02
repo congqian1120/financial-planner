@@ -57,7 +57,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
     let isMounted = true;
     
     const runAnalysis = async () => {
-        // Debounce: prevent running heavy sims on every tiny input change
         if (analysisTimeoutRef.current) window.clearTimeout(analysisTimeoutRef.current);
 
         analysisTimeoutRef.current = window.setTimeout(async () => {
@@ -132,7 +131,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
                     setAnalysis(prev => ({ ...prev, isLoading: false, error: "Failed to update analysis. Please check your connection." }));
                 }
             }
-        }, 300); // 300ms debounce
+        }, 300);
     };
 
     runAnalysis();
@@ -159,15 +158,15 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
   }
 
   return (
-    <div className="p-4 md:p-12 max-w-7xl mx-auto animate-in fade-in duration-500">
+    <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto animate-in fade-in duration-500">
       {modeledStrategy && (
-        <div className="bg-blue-50 border-l-4 border-blue-600 p-4 mb-8 rounded-r-sm flex justify-between items-center shadow-sm">
+        <div className="bg-blue-50 border-l-4 border-blue-600 p-4 mb-8 rounded-r-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
            <div className="text-sm text-blue-800">
-             <span className="font-bold">Modeling Active:</span> Showing projections for <span className="font-bold">{modeledStrategy}</span> strategy. This is a temporary showcase.
+             <span className="font-bold">Modeling Active:</span> Showing projections for <span className="font-bold">{modeledStrategy}</span> strategy.
            </div>
            <button 
             onClick={handleResetModeling}
-            className="text-xs font-bold text-blue-700 hover:text-blue-900 underline underline-offset-2"
+            className="text-xs font-bold text-blue-700 hover:text-blue-900 underline underline-offset-2 shrink-0"
            >
              Reset to current mix
            </button>
@@ -185,12 +184,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
           activeStrategyName={modeledStrategy}
         />
         
-        <div className="mt-6 mb-8 relative min-h-[450px]">
+        <div className="mt-6 mb-8 relative min-h-[300px] lg:min-h-[450px]">
           {analysis.isLoading && (
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-[2px] rounded-sm">
                   <div className="flex flex-col items-center gap-3">
                       <div className="w-10 h-10 border-4 border-slate-200 border-t-green-700 rounded-full animate-spin"></div>
-                      <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Updating Projection</span>
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Updating</span>
                   </div>
               </div>
           )}
@@ -204,7 +203,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
                         onClick={handleRetry}
                         className="flex items-center gap-2 bg-slate-800 text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-slate-900 transition-colors"
                       >
-                          <RefreshCcw size={14} /> Retry Analysis
+                          <RefreshCcw size={14} /> Retry
                       </button>
                   </div>
               </div>

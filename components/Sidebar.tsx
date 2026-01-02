@@ -13,18 +13,25 @@ const steps = [
 interface SidebarProps {
   activeStep: number;
   onStepChange: (step: number) => void;
+  isMobile?: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeStep, onStepChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeStep, onStepChange, isMobile = false }) => {
+  const containerClasses = isMobile 
+    ? "w-full flex flex-col"
+    : "w-72 bg-slate-50 border-r border-slate-200 hidden lg:flex flex-col shrink-0 sticky top-0 h-screen overflow-y-auto";
+
   return (
-    <div className="w-72 bg-slate-50 border-r border-slate-200 hidden lg:flex flex-col shrink-0 sticky top-0 h-screen overflow-y-auto">
-      <div className="p-8 pb-4 shrink-0">
-        <h2 className="text-2xl font-normal text-slate-800 mb-4 leading-tight">Your retirement goal</h2>
-        <div className="flex gap-3 text-sm text-slate-600 mb-8 items-start">
-           <Info className="shrink-0 w-4 h-4 text-green-700 mt-1 fill-green-100" /> 
-           <p className="leading-snug">Complete your profile, to see where you may stand.</p>
+    <div className={containerClasses}>
+      {!isMobile && (
+        <div className="p-8 pb-4 shrink-0">
+          <h2 className="text-2xl font-normal text-slate-800 mb-4 leading-tight">Your retirement goal</h2>
+          <div className="flex gap-3 text-sm text-slate-600 mb-8 items-start">
+             <Info className="shrink-0 w-4 h-4 text-green-700 mt-1 fill-green-100" /> 
+             <p className="leading-snug">Complete your profile, to see where you may stand.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex flex-col w-full pb-10">
         {steps.map((step, index) => {
@@ -44,9 +51,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeStep, onStepChange }) => {
                 >
                    
                    {/* Left Marker Column */}
-                   <div className="w-20 relative flex justify-center shrink-0">
+                   <div className="w-16 lg:w-20 relative flex justify-center shrink-0">
                       {/* Vertical connector line */}
-                      {showLine && (
+                      {!isMobile && showLine && (
                           <div className="absolute top-8 bottom-[-20px] w-0.5 bg-slate-300 left-1/2 -translate-x-1/2"></div>
                       )}
                       
@@ -56,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeStep, onStepChange }) => {
                            <FlaskConical className="w-5 h-5" strokeWidth={1.5} />
                         </div>
                       ) : (
-                        <div className={`mt-5 relative z-10 w-6 h-6 rounded-full flex items-center justify-center ring-4 ring-slate-50 transition-colors duration-200 ${isActive ? 'bg-green-700 ring-white' : 'bg-green-700'}`}>
+                        <div className={`mt-5 relative z-10 w-6 h-6 rounded-full flex items-center justify-center ring-4 transition-colors duration-200 ${isActive ? 'bg-green-700 ring-white' : 'bg-green-700 ring-transparent'}`}>
                            <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
                         </div>
                       )}

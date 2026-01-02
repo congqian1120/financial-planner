@@ -30,12 +30,12 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
 
   return (
     <div className="flex flex-col min-h-screen relative bg-white">
-        <div className="p-8 max-w-4xl animate-in fade-in duration-500 flex-1 pb-24">
+        <div className="p-4 md:p-8 lg:p-12 max-w-4xl animate-in fade-in duration-500 flex-1 pb-32 lg:pb-24">
         <div className="mb-8">
-            <div className="text-sm text-slate-500 mb-4">Navigation</div>
-            <h1 className="text-3xl font-normal text-slate-800 mb-10">Household profile</h1>
+            <div className="text-xs lg:text-sm text-slate-500 mb-4 hidden lg:block">Navigation</div>
+            <h1 className="text-2xl lg:text-3xl font-normal text-slate-800 mb-8 lg:mb-10">Household profile</h1>
             
-            <h2 className="text-xl font-medium text-slate-800 mb-6">Personal information</h2>
+            <h2 className="text-lg lg:text-xl font-medium text-slate-800 mb-6">Personal information</h2>
             
             <div className="space-y-8 max-w-lg">
                 <div>
@@ -90,8 +90,8 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                         <label className="text-sm font-bold text-slate-800">Gender</label>
                         <HelpCircle size={16} className="text-blue-700 fill-white" />
                     </div>
-                    <div className="relative w-40">
-                        <select className="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-2.5 px-3 pr-8 rounded-sm leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                    <div className="relative w-full sm:w-40">
+                        <select className="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-3 lg:py-2.5 px-4 lg:px-3 pr-8 rounded-sm leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                             <option>Male</option>
                             <option>Female</option>
                         </select>
@@ -108,10 +108,11 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                     </div>
                     <div className="text-xs text-slate-500 mb-2">Your annual salary</div>
                     <div className="relative max-w-xs mb-4">
-                        <span className="absolute left-3 top-2.5 text-slate-500 font-medium">$</span>
+                        <span className="absolute left-3 top-2.5 lg:top-2 text-slate-500 font-medium">$</span>
                         <input 
                             type="text" 
-                            className="w-full border border-slate-300 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
+                            inputMode="numeric"
+                            className="w-full border border-slate-300 rounded-sm py-3 lg:py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
                             value={household.income.toLocaleString()}
                             onChange={(e) => handleNumericChange('income', e.target.value)}
                         />
@@ -119,7 +120,7 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
 
                     <button 
                         onClick={() => setIsBonusExpanded(!isBonusExpanded)}
-                        className="flex items-center gap-2 text-slate-700 hover:text-slate-900 mb-4 group"
+                        className="flex items-center gap-2 text-slate-700 hover:text-slate-900 mb-4 group py-2"
                     >
                         {isBonusExpanded ? (
                             <ChevronDown size={20} className="text-slate-500 group-hover:text-slate-700" strokeWidth={1.5} />
@@ -134,10 +135,11 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                              <div>
                                 <div className="text-xs font-bold text-slate-700 mb-1">Bonus <span className="font-normal text-slate-500">(optional)</span></div>
                                 <div className="relative max-w-xs">
-                                    <span className="absolute left-3 top-2.5 text-slate-500 font-medium">$</span>
+                                    <span className="absolute left-3 top-2.5 lg:top-2 text-slate-500 font-medium">$</span>
                                     <input 
                                         type="text" 
-                                        className="w-full border border-slate-300 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
+                                        inputMode="numeric"
+                                        className="w-full border border-slate-300 rounded-sm py-3 lg:py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
                                         value={household.bonus.toLocaleString()}
                                         onChange={(e) => handleNumericChange('bonus', e.target.value)}
                                     />
@@ -150,19 +152,19 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                 <div className="pt-8 border-t border-dotted border-slate-300"></div>
 
                 <div>
-                     <h2 className="text-xl font-medium text-slate-800 mb-4">Household planning</h2>
+                     <h2 className="text-lg lg:text-xl font-medium text-slate-800 mb-4">Household planning</h2>
                      <div className="flex items-center gap-2 mb-3">
                         <label className="text-sm font-bold text-slate-800">Are you planning with someone?</label>
                          <HelpCircle size={16} className="text-blue-700 fill-white" />
                     </div>
                      
                     {!household.planningWithPartner ? (
-                        <label className="flex items-center gap-2 cursor-pointer group">
+                        <label className="flex items-center gap-2 cursor-pointer group py-3 px-1">
                             <input 
                                 type="checkbox" 
                                 checked={household.planningWithPartner}
                                 onChange={(e) => updateHousehold({ planningWithPartner: e.target.checked })}
-                                className="h-4 w-4 border-gray-300 rounded-sm text-green-700 focus:ring-green-700 accent-green-700" 
+                                className="h-5 w-5 lg:h-4 lg:w-4 border-gray-300 rounded-sm text-green-700 focus:ring-green-700 accent-green-700" 
                             />
                             <span className="text-slate-700 group-hover:text-slate-900 text-sm">Yes, I'm planning with a partner</span>
                         </label>
@@ -172,7 +174,7 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                                 <p className="text-sm text-slate-700 mb-4">Yes, I'm planning with a partner</p>
                                 <button 
                                     onClick={() => updateHousehold({ planningWithPartner: false })}
-                                    className="text-sm font-semibold text-slate-700 bg-slate-200 hover:bg-slate-300 py-2 px-6 rounded-full transition-colors"
+                                    className="text-sm font-semibold text-slate-700 bg-slate-200 hover:bg-slate-300 py-2.5 px-6 rounded-full transition-colors w-full sm:w-auto"
                                 >
                                     Remove partner
                                 </button>
@@ -232,10 +234,11 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                                         <HelpCircle size={16} className="text-blue-700 fill-white" />
                                     </div>
                                     <div className="relative max-w-xs mb-4">
-                                        <span className="absolute left-3 top-2.5 text-slate-500 font-medium">$</span>
+                                        <span className="absolute left-3 top-2.5 lg:top-2 text-slate-500 font-medium">$</span>
                                         <input 
                                             type="text" 
-                                            className="w-full border border-slate-300 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
+                                            inputMode="numeric"
+                                            className="w-full border border-slate-300 rounded-sm py-3 lg:py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
                                             value={household.partnerIncome.toLocaleString()}
                                             onChange={(e) => handleNumericChange('partnerIncome', e.target.value)}
                                         />
@@ -248,15 +251,16 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
             </div>
         </div>
 
-        <div className="border-t border-slate-200 p-4 bg-white flex justify-between sticky bottom-0 z-20">
+        {/* Action Bar - Mobile Fixed, Desktop Relative */}
+        <div className="fixed lg:relative bottom-0 left-0 right-0 border-t border-slate-200 p-4 bg-white flex justify-between z-40 lg:z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:shadow-none">
              <div>
                  {onPrevious && (
-                     <button onClick={onPrevious} className="text-slate-600 font-bold py-2 px-8 hover:bg-slate-50 rounded-full transition-colors text-sm">
+                     <button onClick={onPrevious} className="text-slate-600 font-bold py-3 px-8 hover:bg-slate-50 rounded-full transition-colors text-sm">
                         Previous
                     </button>
                  )}
              </div>
-             <button onClick={onNext} className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2 px-8 rounded-full transition-colors shadow-sm text-sm">
+             <button onClick={onNext} className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-3 px-10 lg:px-8 rounded-full transition-colors shadow-sm text-sm">
                 Next
             </button>
         </div>

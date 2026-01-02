@@ -7,6 +7,7 @@ import RetirementExpenses from './components/RetirementExpenses';
 import AccountsPage from './components/AccountsPage';
 import RetirementIncome from './components/RetirementIncome';
 import { AppData, Account } from './types';
+import { Menu, X, ChevronRight } from 'lucide-react';
 
 const STORAGE_KEY = 'retirement_planner_data';
 
@@ -140,7 +141,6 @@ const DEFAULT_DATA: AppData = {
   modeledStrategy: null
 };
 
-// Simple Error Boundary Functional Component
 const AppErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [hasError, setHasError] = useState(false);
   
@@ -173,8 +173,18 @@ const AppErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children })
   return <>{children}</>;
 };
 
+const STEP_NAMES = [
+  'Household profile',
+  'Retirement profile',
+  'Retirement expenses',
+  'Accounts',
+  'Retirement income',
+  'Your retirement analysis'
+];
+
 const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [data, setData] = useState<AppData>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -197,10 +207,18 @@ const App: React.FC = () => {
 
   const nextStep = () => {
     setCurrentStep((prev) => Math.min(prev + 1, 5));
+    window.scrollTo(0, 0);
   };
 
   const prevStep = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
+    window.scrollTo(0, 0);
+  };
+
+  const navigateToStep = (step: number) => {
+    setCurrentStep(step);
+    setIsMobileMenuOpen(false);
+    window.scrollTo(0, 0);
   };
 
   const renderContent = () => {
@@ -217,8 +235,41 @@ const App: React.FC = () => {
 
   return (
     <AppErrorBoundary>
-      <div className="min-h-screen bg-white font-sans text-slate-900 flex">
-        <Sidebar activeStep={currentStep} onStepChange={setCurrentStep} />
+      <div className="min-h-screen bg-white font-sans text-slate-900 flex flex-col lg:flex-row">
+        {/* Desktop Sidebar */}
+        <Sidebar activeStep={currentStep} onStepChange={navigateToStep} />
+
+        {/* Mobile Header */}
+        <div className="lg:hidden sticky top-0 z-40 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Step {currentStep + 1} of 6</span>
+            <span className="text-sm font-bold text-slate-800 flex items-center gap-1">
+              {STEP_NAMES[currentStep]}
+            </span>
+          </div>
+          <button 
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="p-2 hover:bg-slate-50 rounded-full transition-colors"
+          >
+            <Menu size={24} className="text-slate-600" />
+          </button>
+        </div>
+
+        {/* Mobile Menu Drawer */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden fixed inset-0 z-50 flex flex-col bg-white animate-in slide-in-from-right duration-300">
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <span className="font-bold text-slate-800">Plan Navigation</span>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2">
+                <X size={24} className="text-slate-600" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+               <Sidebar activeStep={currentStep} onStepChange={navigateToStep} isMobile />
+            </div>
+          </div>
+        )}
+
         <div className="flex-1 min-w-0 flex flex-col">
           {renderContent()}
         </div>
