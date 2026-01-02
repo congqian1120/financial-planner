@@ -109,8 +109,8 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, updateD
 
   const { accounts, household } = data;
 
-  // Calculate account statistics
-  const { totalBalance, assignedCount, totalCount, visibleAccounts } = useMemo(() => {
+  // Calculate account statistics and dynamic table rows
+  const { totalBalance, assignedCount, totalCount, visibleAccounts, tableRows } = useMemo(() => {
     const filtered = accounts.filter(acc => {
       if (!household.planningWithPartner && acc.owner === 'MONEY') return false;
       return true;
@@ -122,11 +122,35 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, updateD
     
     const assigned = filtered.filter(a => a.goal === 'RETIREMENT').length;
     
+    const accountsForTable = filtered.filter(a => a.goal === 'RETIREMENT');
+
+    // Helper to generate a consistent mock mix based on account type for visual parity
+    const getMockMix = (acc: Account) => {
+        const type = acc.type.toUpperCase();
+        if (type.includes('ROTH')) return { domestic: '98.87%', foreign: '1.01%', bonds: '0%', shortTerm: '0.12%', other: '', unknown: '' };
+        if (type.includes('INDIVIDUAL')) return { domestic: '13.8%', foreign: '5.89%', bonds: '74.53%', shortTerm: '5.77%', other: '0.01%', unknown: '' };
+        if (type.includes('401K')) return { domestic: '58.11%', foreign: '26.66%', bonds: '14.29%', shortTerm: '0.88%', other: '0.07%', unknown: '' };
+        if (type.includes('HEALTH')) return { domestic: '13.97%', foreign: '5.11%', bonds: '74.16%', shortTerm: '6.75%', other: '0.01%', unknown: '' };
+        return { domestic: '91.25%', foreign: '8.7%', bonds: '0%', shortTerm: '0.05%', other: '', unknown: '' };
+    };
+
+    const rows = accountsForTable.map(acc => {
+        const mix = getMockMix(acc);
+        return {
+            name: acc.name,
+            number: acc.number,
+            balance: acc.value,
+            pctOfGoal: total > 0 ? `${((acc.value / total) * 100).toFixed(2)}%` : '0%',
+            ...mix
+        };
+    });
+    
     return {
       totalBalance: total,
       assignedCount: assigned,
       totalCount: filtered.length,
-      visibleAccounts: filtered.filter(a => a.goal === 'RETIREMENT')
+      visibleAccounts: accountsForTable,
+      tableRows: rows
     };
   }, [accounts, household.planningWithPartner]);
 
@@ -155,81 +179,6 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, updateD
       { name: 'Other', value: allocation[4], color: '#e57200' },
     ];
   }, [selectedStrategy]);
-
-  const tableRows = [
-    {
-      name: 'ROTH IRA',
-      number: 'XXXX0425',
-      balance: 53306.28,
-      pctOfGoal: '5.63%',
-      domestic: '98.87%',
-      foreign: '1.01%',
-      bonds: '0%',
-      shortTerm: '0.12%',
-      other: '',
-      unknown: ''
-    },
-    {
-      name: 'LUKING y Individual TOD Account (MA)',
-      number: 'XXXX2447',
-      balance: 15.94,
-      pctOfGoal: '0%',
-      domestic: '13.8%',
-      foreign: '5.89%',
-      bonds: '74.53%',
-      shortTerm: '5.77%',
-      other: '0.01%',
-      unknown: ''
-    },
-    {
-      name: 'FIDELITY 401K SAVINGS',
-      number: 'XXXX1234',
-      balance: 456141.56,
-      pctOfGoal: '48.24%',
-      domestic: '58.11%',
-      foreign: '26.66%',
-      bonds: '14.29%',
-      shortTerm: '0.88%',
-      other: '0.07%',
-      unknown: ''
-    },
-    {
-      name: 'Luking\'s Fidelity Go (MA)',
-      number: 'XXXX0562',
-      balance: 157.48,
-      pctOfGoal: '0.01%',
-      domestic: '13.97%',
-      foreign: '5.11%',
-      bonds: '74.16%',
-      shortTerm: '6.75%',
-      other: '0.01%',
-      unknown: ''
-    },
-    {
-      name: 'UAL - TOD',
-      number: 'XXXX7100',
-      balance: 379853.69,
-      pctOfGoal: '40.1%',
-      domestic: '91.25%',
-      foreign: '8.7%',
-      bonds: '0%',
-      shortTerm: '0.05%',
-      other: '',
-      unknown: ''
-    },
-    {
-      name: 'SAVINGS',
-      number: 'XXXX9922',
-      balance: 55752.14,
-      pctOfGoal: '5.9%',
-      domestic: '91.31%',
-      foreign: '8.64%',
-      bonds: '0%',
-      shortTerm: '0.05%',
-      other: '',
-      unknown: ''
-    }
-  ];
 
   useEffect(() => {
     const timer = setTimeout(() => {
