@@ -127,6 +127,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
           setViewMode={setViewMode} 
           projectionType={projectionType}
           setProjectionType={setProjectionType}
+          activeStrategyName={modeledStrategy}
         />
         
         <div className="mt-6 mb-8">

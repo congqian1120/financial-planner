@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
 import { ViewMode, ProjectionType } from '../types';
@@ -8,13 +7,26 @@ interface ControlsProps {
   setViewMode: (mode: ViewMode) => void;
   projectionType: ProjectionType;
   setProjectionType: (type: ProjectionType) => void;
+  activeStrategyName?: string | null;
 }
 
-const Controls: React.FC<ControlsProps> = ({ viewMode, setViewMode, projectionType, setProjectionType }) => {
+const Controls: React.FC<ControlsProps> = ({ 
+  viewMode, 
+  setViewMode, 
+  projectionType, 
+  setProjectionType,
+  activeStrategyName
+}) => {
   
   const renderDescription = () => {
     const todayDollarsSpan = <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">today's dollars</span>;
-    const assetMixSpan = <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">your moderate asset mix</span>;
+    
+    // If we have a modeled strategy, show its name. Otherwise, clarify it is the current mix.
+    const assetMixLabel = activeStrategyName 
+      ? `the ${activeStrategyName.toLowerCase()} asset mix` 
+      : "your current asset mix";
+      
+    const assetMixSpan = <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">{assetMixLabel}</span>;
     const marketSpan = <span className="underline decoration-dotted underline-offset-4 decoration-slate-400 cursor-help">significantly below average market conditions</span>;
 
     if (projectionType === ProjectionType.MONTHLY_CASH_FLOW || projectionType === ProjectionType.YEARLY_CASH_FLOW) {
