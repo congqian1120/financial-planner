@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Wallet, MapPin, Banknote, Info, CheckCircle2, BookOpen, User, PieChart, X, AlertCircle, ExternalLink, TrendingUp, FileText } from 'lucide-react';
 import { AppData } from '../types';
@@ -20,14 +19,42 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate, onExploreSa
 
   const { retirement, accounts, household, income } = data;
 
-  // Derived Calculations
-  const totalSaved = accounts.filter(a => a.goal === 'RETIREMENT').reduce((sum, a) => sum + a.value, 0);
-  const totalContributions = accounts.filter(a => a.goal === 'RETIREMENT').reduce((sum, a) => sum + a.contributions, 0);
-  const assignedAccountsCount = accounts.filter(a => a.goal === 'RETIREMENT').length;
-  
-  const expenses = calculateExpenses(data.expenses);
+  // Filter accounts based on goal and planning status
+  const visibleAccounts = accounts.filter(acc => {
+    if (!household.planningWithPartner && acc.owner === 'MONEY') return false;
+    return true;
+  });
 
-  const lifetimeIncome = income.socialSecurity.amount + income.pension + income.annuity;
+  const retirementAccounts = visibleAccounts.filter(a => a.goal === 'RETIREMENT');
+  
+  // Dynamic Calculations
+  const totalSaved = retirementAccounts.reduce((sum, a) => sum + a.value, 0);
+  const totalContributions = retirementAccounts.reduce((sum, a) => sum + a.contributions, 0);
+  const assignedAccountsCount = retirementAccounts.length;
+  
+  // Tax Type Percentages Calculation
+  const taxDeferredValue = retirementAccounts.filter(a => 
+    a.type.toUpperCase().includes('401K') || 
+    (a.type.toUpperCase().includes('IRA') && !a.type.toUpperCase().includes('ROTH'))
+  ).reduce((s, a) => s + a.value, 0);
+
+  const taxableValue = retirementAccounts.filter(a => 
+    a.type.toUpperCase().includes('INDIVIDUAL') || 
+    a.type.toUpperCase().includes('BROKERAGE')
+  ).reduce((s, a) => s + a.value, 0);
+
+  const taxExemptValue = retirementAccounts.filter(a => 
+    a.type.toUpperCase().includes('ROTH') || 
+    a.type.toUpperCase().includes('HEALTH') || 
+    a.type.toUpperCase().includes('HSA')
+  ).reduce((s, a) => s + a.value, 0);
+
+  const totalBase = totalSaved || 1;
+  const taxDeferredPct = Math.round((taxDeferredValue / totalBase) * 100);
+  const taxablePct = Math.round((taxableValue / totalBase) * 100);
+  const taxExemptPct = Math.round((taxExemptValue / totalBase) * 100);
+
+  const expenses = calculateExpenses(data.expenses);
 
   const handleNotMockedClick = (e: React.MouseEvent, feature: string) => {
     e.preventDefault();
@@ -81,24 +108,24 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ data, onNavigate, onExploreSa
 
           <div className="mb-6">
             <div className="text-3xl font-normal text-slate-900 mb-1">${totalSaved.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
-            <p className="text-slate-500 text-sm">from {assignedAccountsCount} out of {accounts.length} accounts</p>
+            <p className="text-slate-500 text-sm">from {assignedAccountsCount} out of {visibleAccounts.length} accounts</p>
           </div>
 
           <div className="space-y-3">
             <div className="flex items-end justify-between text-sm text-slate-600">
               <span>Tax deferred account</span>
               <div className="flex-grow mx-2 border-b border-dotted border-slate-300 mb-1"></div>
-              <span className="font-medium">48%</span>
+              <span className="font-medium">{taxDeferredPct}%</span>
             </div>
             <div className="flex items-end justify-between text-sm text-slate-600">
               <span>Taxable account</span>
               <div className="flex-grow mx-2 border-b border-dotted border-slate-300 mb-1"></div>
-              <span className="font-medium">40%</span>
+              <span className="font-medium">{taxablePct}%</span>
             </div>
             <div className="flex items-end justify-between text-sm text-slate-600">
               <span>Tax exempt account</span>
               <div className="flex-grow mx-2 border-b border-dotted border-slate-300 mb-1"></div>
-              <span className="font-medium">13%</span>
+              <span className="font-medium">{taxExemptPct}%</span>
             </div>
           </div>
         </div>

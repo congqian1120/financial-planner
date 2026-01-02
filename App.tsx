@@ -7,7 +7,7 @@ import RetirementExpenses from './components/RetirementExpenses';
 import AccountsPage from './components/AccountsPage';
 import RetirementIncome from './components/RetirementIncome';
 import { AppData, Account } from './types';
-import { Menu, X, ChevronRight } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const STORAGE_KEY = 'retirement_planner_data';
 
@@ -17,22 +17,22 @@ const INITIAL_ACCOUNTS: Account[] = [
     name: "ROTH IRA", 
     number: "XXXX9977", 
     goal: "RETIREMENT", 
-    type: "ROTH IRA\nSelf-Directed", 
+    type: "ROTH IRA\nSELF-DIRECTED", 
     owner: "RICH", 
     value: 59284.43, 
-    contributions: 2400,
-    assetBreakdown: { domestic: 98.87, foreign: 1.01, bonds: 0, shortTerm: 0.12, other: 0 }
+    contributions: 6000,
+    assetBreakdown: { domestic: 98, foreign: 2, bonds: 0, shortTerm: 0, other: 0 }
   },
   { 
     id: 2, 
     name: "INDIVIDUAL - TOD", 
     number: "XXXX7621", 
     goal: "RETIREMENT", 
-    type: "INDIVIDUAL - TOD\nFidelity Go", 
+    type: "INDIVIDUAL - TOD\nFIDELITY GO", 
     owner: "RICH", 
     value: 75.10, 
-    contributions: 0,
-    assetBreakdown: { domestic: 13.8, foreign: 5.89, bonds: 74.53, shortTerm: 5.77, other: 0.01 }
+    contributions: 0, 
+    assetBreakdown: { domestic: 13, foreign: 6, bonds: 74, shortTerm: 7, other: 0 }
   },
   { 
     id: 3, 
@@ -42,53 +42,53 @@ const INITIAL_ACCOUNTS: Account[] = [
     type: "401K RETIREMENT SAVINGS PLAN", 
     owner: "RICH", 
     value: 441757.88, 
-    contributions: 20500,
-    assetBreakdown: { domestic: 58.11, foreign: 26.66, bonds: 14.29, shortTerm: 0.88, other: 0.07 }
+    contributions: 41500,
+    assetBreakdown: { domestic: 58, foreign: 27, bonds: 14, shortTerm: 1, other: 0 }
   },
   { 
     id: 4, 
-    name: "401K SAVINGS PLAN", 
+    name: "401K RETIREMENT SAVINGS PLAN", 
     number: "XXXX8822", 
     goal: "RETIREMENT", 
     type: "401K RETIREMENT SAVINGS PLAN", 
-    owner: "MONEY",
-    value: 312450.00, 
+    owner: "MONEY", 
+    value: 198920.02, 
     contributions: 15000,
-    assetBreakdown: { domestic: 65.00, foreign: 25.00, bonds: 10.00, shortTerm: 0, other: 0 }
+    assetBreakdown: { domestic: 65, foreign: 25, bonds: 10, shortTerm: 0, other: 0 }
   },
   { 
     id: 5, 
     name: "INDIVIDUAL - TOD", 
     number: "XXXX0562", 
     goal: "RETIREMENT", 
-    type: "INDIVIDUAL - TOD\nSelf-Directed", 
+    type: "INDIVIDUAL - TOD\nSELF-DIRECTED", 
     owner: "RICH", 
-    value: 485742.99, 
+    value: 531579.90, 
     contributions: 0,
-    assetBreakdown: { domestic: 91.25, foreign: 8.7, bonds: 0, shortTerm: 0.05, other: 0 }
+    assetBreakdown: { domestic: 91, foreign: 9, bonds: 0, shortTerm: 0, other: 0 }
   },
   { 
     id: 6, 
     name: "HEALTH SAVINGS ACCOUNT", 
     number: "XXXX8430", 
     goal: "RETIREMENT", 
-    type: "HEALTH SAVINGS ACCOUNT\nSelf-Directed", 
+    type: "HEALTH SAVINGS ACCOUNT\nSELF-DIRECTED", 
     owner: "RICH", 
     value: 4551.10, 
     contributions: 3500,
-    assetBreakdown: { domestic: 13.97, foreign: 5.11, bonds: 74.16, shortTerm: 6.75, other: 0.01 }
+    assetBreakdown: { domestic: 14, foreign: 5, bonds: 74, shortTerm: 7, other: 0 }
   },
   { 
     id: 7, 
     name: "ROTH IRA", 
     number: "XXXX1122", 
     goal: "RETIREMENT", 
-    type: "ROTH IRA\nSelf-Directed", 
-    owner: "MONEY",
-    value: 42100.00, 
+    type: "ROTH IRA\nSELF-DIRECTED", 
+    owner: "MONEY", 
+    value: 109793.57, 
     contributions: 6000,
-    assetBreakdown: { domestic: 95.00, foreign: 5.00, bonds: 0, shortTerm: 0, other: 0 }
-  },
+    assetBreakdown: { domestic: 95, foreign: 5, bonds: 0, shortTerm: 0, other: 0 }
+  }
 ];
 
 const DEFAULT_DATA: AppData = {

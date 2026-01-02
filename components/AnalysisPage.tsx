@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import Header from './Header';
 import Controls from './Controls';
@@ -50,7 +51,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
       summaryStats: { avgMonthlyIncome: 0, belowAvgMonthlyIncome: 0, sigBelowAvgMonthlyIncome: 0, monthlyNeed: 0 }
   });
 
-  const { household, retirement, accounts, modeledStrategy } = data;
+  const { household, retirement, accounts, modeledStrategy, income } = data;
   const analysisTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -93,8 +94,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
                 const birthYear = new Date(household.dob).getFullYear();
                 const currentAge = isNaN(birthYear) ? DEFAULT_CURRENT_AGE : (CURRENT_YEAR - birthYear);
                 
-                let monthlyNeed = data.expenses.essential + data.expenses.nonEssential;
-                if (!household.planningWithPartner) monthlyNeed = Math.round(monthlyNeed * 0.65);
+                const monthlyNeed = data.expenses.essential + data.expenses.nonEssential;
+                const fixedMonthlyIncome = (income.socialSecurity.enabled ? income.socialSecurity.amount : 0) + 
+                                          income.pension + 
+                                          income.annuity + 
+                                          income.other;
+                const annualFixedIncome = fixedMonthlyIncome * 12;
 
                 const result = await fetchProjectionResult(
                     currentAge, 
@@ -103,14 +108,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
                     totalSaved, 
                     totalContributions,
                     params,
-                    monthlyNeed
+                    monthlyNeed,
+                    annualFixedIncome
                 );
 
                 if (!isMounted) return;
 
                 const flowData = generateCashFlowData(currentAge, retirement.retirementAge, retirement.planToAge);
-                const retYear = CURRENT_YEAR + (retirement.retirementAge - currentAge);
-                const finalYearData = result.projectionData[result.projectionData.length - 1];
+                const retYearOffset = retirement.retirementAge - currentAge;
+                const retYear = CURRENT_YEAR + retYearOffset;
+                
+                // Use balance AT retirement for monthly income calculation, not balance at end of life
+                const retirementYearData = result.projectionData[retYearOffset] || result.projectionData[result.projectionData.length - 1];
 
                 setAnalysis({
                     projectionData: result.projectionData,
@@ -120,9 +129,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
                     isLoading: false,
                     error: null,
                     summaryStats: {
-                        avgMonthlyIncome: Math.round((finalYearData.average * 0.04) / 12),
-                        belowAvgMonthlyIncome: Math.round((finalYearData.belowAverage * 0.04) / 12),
-                        sigBelowAvgMonthlyIncome: Math.round((finalYearData.significantlyBelowAverage * 0.04) / 12),
+                        avgMonthlyIncome: Math.round(((retirementYearData.average * 0.04) / 12) + fixedMonthlyIncome),
+                        belowAvgMonthlyIncome: Math.round(((retirementYearData.belowAverage * 0.04) / 12) + fixedMonthlyIncome),
+                        sigBelowAvgMonthlyIncome: Math.round(((retirementYearData.significantlyBelowAverage * 0.04) / 12) + fixedMonthlyIncome),
                         monthlyNeed
                     }
                 });
