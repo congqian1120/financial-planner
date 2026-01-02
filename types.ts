@@ -23,6 +23,14 @@ export enum ProjectionType {
   YEARLY_CASH_FLOW = 'Yearly cash flow in retirement'
 }
 
+export interface AssetBreakdown {
+  domestic: number; // Percentage 0-100
+  foreign: number;
+  bonds: number;
+  shortTerm: number;
+  other: number;
+}
+
 export interface Account {
   id: number;
   name: string;
@@ -33,6 +41,7 @@ export interface Account {
   value: number;
   contributions: number;
   isOutside?: boolean;
+  assetBreakdown?: AssetBreakdown;
 }
 
 export interface AppData {

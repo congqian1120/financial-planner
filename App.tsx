@@ -17,7 +17,8 @@ const INITIAL_ACCOUNTS: Account[] = [
     type: "ROTH IRA\nSelf-Directed", 
     owner: "RICH", 
     value: 59284.43, 
-    contributions: 2400 
+    contributions: 2400,
+    assetBreakdown: { domestic: 98.87, foreign: 1.01, bonds: 0, shortTerm: 0.12, other: 0 }
   },
   { 
     id: 2, 
@@ -27,7 +28,8 @@ const INITIAL_ACCOUNTS: Account[] = [
     type: "INDIVIDUAL - TOD\nFidelity Go", 
     owner: "RICH", 
     value: 75.10, 
-    contributions: 0 
+    contributions: 0,
+    assetBreakdown: { domestic: 13.8, foreign: 5.89, bonds: 74.53, shortTerm: 5.77, other: 0.01 }
   },
   { 
     id: 3, 
@@ -37,7 +39,8 @@ const INITIAL_ACCOUNTS: Account[] = [
     type: "401K RETIREMENT SAVINGS PLAN", 
     owner: "RICH", 
     value: 441757.88, 
-    contributions: 20500 
+    contributions: 20500,
+    assetBreakdown: { domestic: 58.11, foreign: 26.66, bonds: 14.29, shortTerm: 0.88, other: 0.07 }
   },
   { 
     id: 4, 
@@ -47,7 +50,8 @@ const INITIAL_ACCOUNTS: Account[] = [
     type: "401K RETIREMENT SAVINGS PLAN", 
     owner: "MONEY", // Partner account
     value: 312450.00, 
-    contributions: 15000 
+    contributions: 15000,
+    assetBreakdown: { domestic: 65.00, foreign: 25.00, bonds: 10.00, shortTerm: 0, other: 0 }
   },
   { 
     id: 5, 
@@ -57,7 +61,8 @@ const INITIAL_ACCOUNTS: Account[] = [
     type: "INDIVIDUAL - TOD\nSelf-Directed", 
     owner: "RICH", 
     value: 485742.99, 
-    contributions: 0 
+    contributions: 0,
+    assetBreakdown: { domestic: 91.25, foreign: 8.7, bonds: 0, shortTerm: 0.05, other: 0 }
   },
   { 
     id: 6, 
@@ -67,7 +72,8 @@ const INITIAL_ACCOUNTS: Account[] = [
     type: "HEALTH SAVINGS ACCOUNT\nSelf-Directed", 
     owner: "RICH", 
     value: 4551.10, 
-    contributions: 3500 
+    contributions: 3500,
+    assetBreakdown: { domestic: 13.97, foreign: 5.11, bonds: 74.16, shortTerm: 6.75, other: 0.01 }
   },
   { 
     id: 7, 
@@ -77,7 +83,8 @@ const INITIAL_ACCOUNTS: Account[] = [
     type: "ROTH IRA\nSelf-Directed", 
     owner: "MONEY", // Partner account
     value: 42100.00, 
-    contributions: 6000 
+    contributions: 6000,
+    assetBreakdown: { domestic: 95.00, foreign: 5.00, bonds: 0, shortTerm: 0, other: 0 }
   },
 ];
 

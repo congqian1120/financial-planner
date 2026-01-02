@@ -110,64 +110,59 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, updateD
   const { accounts, household } = data;
 
   // Calculate account statistics and dynamic table rows
-  const { totalBalance, assignedCount, totalCount, visibleAccounts, tableRows } = useMemo(() => {
+  const { totalBalance, assignedCount, totalCount, tableRows, currentMixData } = useMemo(() => {
     const filtered = accounts.filter(acc => {
       if (!household.planningWithPartner && acc.owner === 'MONEY') return false;
       return true;
     });
 
-    const total = filtered
-      .filter(a => a.goal === 'RETIREMENT')
-      .reduce((sum, a) => sum + a.value, 0);
+    const accountsForRetirement = filtered.filter(a => a.goal === 'RETIREMENT');
+    const total = accountsForRetirement.reduce((sum, a) => sum + a.value, 0);
+    const assigned = accountsForRetirement.length;
     
-    const assigned = filtered.filter(a => a.goal === 'RETIREMENT').length;
-    
-    const accountsForTable = filtered.filter(a => a.goal === 'RETIREMENT');
+    // Aggregate weighted breakdown for the Pie Chart
+    let aggDomestic = 0, aggForeign = 0, aggBonds = 0, aggShortTerm = 0, aggOther = 0;
 
-    // Helper to generate a consistent mock mix based on account type for visual parity
-    const getMockMix = (acc: Account) => {
-        const type = acc.type.toUpperCase();
-        if (type.includes('ROTH')) return { domestic: '98.87%', foreign: '1.01%', bonds: '0%', shortTerm: '0.12%', other: '', unknown: '' };
-        if (type.includes('INDIVIDUAL')) return { domestic: '13.8%', foreign: '5.89%', bonds: '74.53%', shortTerm: '5.77%', other: '0.01%', unknown: '' };
-        if (type.includes('401K')) return { domestic: '58.11%', foreign: '26.66%', bonds: '14.29%', shortTerm: '0.88%', other: '0.07%', unknown: '' };
-        if (type.includes('HEALTH')) return { domestic: '13.97%', foreign: '5.11%', bonds: '74.16%', shortTerm: '6.75%', other: '0.01%', unknown: '' };
-        return { domestic: '91.25%', foreign: '8.7%', bonds: '0%', shortTerm: '0.05%', other: '', unknown: '' };
-    };
+    const rows = accountsForRetirement.map(acc => {
+        const breakdown = acc.assetBreakdown || { domestic: 0, foreign: 0, bonds: 0, shortTerm: 0, other: 0 };
+        
+        // Accumulate weighted values
+        aggDomestic += (breakdown.domestic / 100) * acc.value;
+        aggForeign += (breakdown.foreign / 100) * acc.value;
+        aggBonds += (breakdown.bonds / 100) * acc.value;
+        aggShortTerm += (breakdown.shortTerm / 100) * acc.value;
+        aggOther += (breakdown.other / 100) * acc.value;
 
-    const rows = accountsForTable.map(acc => {
-        const mix = getMockMix(acc);
         return {
             name: acc.name,
             number: acc.number,
             balance: acc.value,
             pctOfGoal: total > 0 ? `${((acc.value / total) * 100).toFixed(2)}%` : '0%',
-            ...mix
+            domestic: `${breakdown.domestic}%`,
+            foreign: `${breakdown.foreign}%`,
+            bonds: `${breakdown.bonds}%`,
+            shortTerm: `${breakdown.shortTerm}%`,
+            other: breakdown.other > 0 ? `${breakdown.other}%` : '',
+            unknown: ''
         };
     });
+
+    const mixData = total > 0 ? [
+        { name: 'Domestic stock', value: Number(((aggDomestic / total) * 100).toFixed(1)), color: '#004a99' },
+        { name: 'Foreign stock', value: Number(((aggForeign / total) * 100).toFixed(1)), color: '#00a0d2' },
+        { name: 'Bonds', value: Number(((aggBonds / total) * 100).toFixed(1)), color: '#6ab023' },
+        { name: 'Short term', value: Number(((aggShortTerm / total) * 100).toFixed(1)), color: '#ffc20e' },
+        { name: 'Other', value: Number(((aggOther / total) * 100).toFixed(1)), color: '#e57200' },
+    ] : [];
     
     return {
       totalBalance: total,
       assignedCount: assigned,
       totalCount: filtered.length,
-      visibleAccounts: accountsForTable,
-      tableRows: rows
+      tableRows: rows,
+      currentMixData: mixData
     };
   }, [accounts, household.planningWithPartner]);
-
-  // Comparison Table Data
-  const comparisonData = {
-    target: [60, 25, 15, 0, 0, 0],
-    current: [78.78, 13.2, 6.89, 0.98, 0.16, 0],
-    comparison: [-18.78, 11.80, 8.11, -0.98, -0.16, 0.00]
-  };
-
-  const currentMixData = [
-    { name: 'Domestic stock', value: 78.8, color: '#004a99' },
-    { name: 'Foreign stock', value: 12.2, color: '#00a0d2' },
-    { name: 'Bonds', value: 6.9, color: '#6ab023' },
-    { name: 'Short term', value: 1.5, color: '#ffc20e' },
-    { name: 'Other', value: 0.6, color: '#e57200' },
-  ];
 
   const targetMixData = useMemo(() => {
     const allocation = STRATEGY_ALLOCATIONS[selectedStrategy] || [0, 0, 0, 0, 0];
@@ -219,6 +214,7 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, updateD
         </div>
         <div className="w-full max-w-[240px] space-y-1.5 mb-8">
             {currentMixData.map((item, index) => (
+                item.value > 0 && (
                 <div key={index} className="flex items-center justify-between text-[12px]">
                     <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></div>
@@ -226,6 +222,7 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, updateD
                     </div>
                     <span className="text-slate-700 font-bold">{item.value}%</span>
                 </div>
+                )
             ))}
         </div>
         {showStats && (
@@ -579,7 +576,7 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, updateD
                                 <tr className="bg-white">
                                     <td className="p-5 text-sm font-bold text-slate-700 border-r border-slate-200">Comparison</td>
                                     {targetMixData.map((item, i) => {
-                                        const currentVal = currentMixData[i].value;
+                                        const currentVal = currentMixData.find(m => m.name === item.name)?.value || 0;
                                         const diff = item.value - currentVal;
                                         return (
                                             <td key={i} className="p-5 text-sm font-bold border-r last:border-r-0 border-slate-200 text-slate-700">
