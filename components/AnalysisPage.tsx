@@ -184,7 +184,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
           activeStrategyName={modeledStrategy}
         />
         
-        <div className="mt-6 mb-8 relative min-h-[300px] lg:min-h-[450px]">
+        <div className="mt-4 md:mt-6 mb-8 relative min-h-[500px] md:min-h-[550px] lg:min-h-[600px]">
           {analysis.isLoading && (
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-[2px] rounded-sm">
                   <div className="flex flex-col items-center gap-3">
