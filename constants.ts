@@ -6,7 +6,19 @@ export const DEFAULT_CURRENT_AGE = 33;
 // Simulation Configuration
 const NUM_TRIALS = 1000;
 
-// Market assumptions for different strategies (Real Returns)
+/** 
+ * Market assumptions per asset class (Real Returns - Inflation Adjusted)
+ * These are the building blocks for custom portfolio projections.
+ */
+export const ASSET_CLASS_MARKET_PARAMS: Record<string, { mean: number; vol: number }> = {
+  domestic: { mean: 0.065, vol: 0.18 },  // High risk/return
+  foreign: { mean: 0.070, vol: 0.21 },   // Higher risk
+  bonds: { mean: 0.025, vol: 0.06 },     // Low risk/return
+  shortTerm: { mean: 0.015, vol: 0.02 }, // Minimal risk
+  other: { mean: 0.045, vol: 0.15 },     // Moderate
+};
+
+// Market assumptions for predefined strategies (for the "Modeled" comparison)
 export const STRATEGY_MARKET_PARAMS: Record<string, { mean: number; vol: number }> = {
   'Short-term': { mean: 0.015, vol: 0.03 },
   'Conservative': { mean: 0.025, vol: 0.06 },
@@ -21,7 +33,6 @@ export const STRATEGY_MARKET_PARAMS: Record<string, { mean: number; vol: number 
 
 /**
  * Box-Muller transform to generate a random number from a normal distribution
- * Mean = 0, StdDev = 1
  */
 const gaussianRandom = () => {
   const u = 1 - Math.random();
@@ -35,49 +46,35 @@ export const generateProjectionData = (
   planToAge: number, 
   totalSaved: number, 
   annualContribution: number,
-  meanReturn: number = 0.045, // Default to Moderate
-  volatility: number = 0.11    // Default to Moderate
+  meanReturn: number = 0.045, 
+  volatility: number = 0.11
 ): ProjectionData[] => {
   const startYear = CURRENT_YEAR;
   const numYears = planToAge - currentAge;
   const retirementYearOffset = retirementAge - currentAge;
 
-  // Initialize 1000 trials
   const trials: number[][] = Array.from({ length: NUM_TRIALS }, () => [totalSaved]);
 
-  // Run the simulation year by year for all trials
   for (let yearIdx = 1; yearIdx <= numYears; yearIdx++) {
     for (let trialIdx = 0; trialIdx < NUM_TRIALS; trialIdx++) {
       const prevBalance = trials[trialIdx][yearIdx - 1];
-      
-      // Generate a random return for this year (Stochastic component)
       const randomReturn = meanReturn + (gaussianRandom() * volatility);
-      
-      // Accumulation vs Withdrawal phase
       const contribution = yearIdx <= retirementYearOffset ? annualContribution : 0;
-      
-      // Compounding: (Balance + Contribution) * (1 + r)
       const nextBalance = Math.max(0, (prevBalance + contribution) * (1 + randomReturn));
       trials[trialIdx].push(nextBalance);
     }
   }
 
-  // Process the trials to find percentiles for each year
   const data: ProjectionData[] = [];
   for (let yearIdx = 0; yearIdx <= numYears; yearIdx++) {
     const yearBalances = trials.map(t => t[yearIdx]).sort((a, b) => a - b);
-    
     data.push({
       year: startYear + yearIdx,
-      // 50th Percentile (Median) -> Average Market
       average: Math.round(yearBalances[Math.floor(NUM_TRIALS * 0.50)]),
-      // 25th Percentile -> Below Average Market
       belowAverage: Math.round(yearBalances[Math.floor(NUM_TRIALS * 0.25)]),
-      // 5th Percentile -> Significantly Below Average Market
       significantlyBelowAverage: Math.round(yearBalances[Math.floor(NUM_TRIALS * 0.05)]),
     });
   }
-
   return data;
 };
 
@@ -89,27 +86,13 @@ export const generateCashFlowData = (
   const startYear = CURRENT_YEAR;
   const retirementYear = startYear + (retirementAge - currentAge);
   const endYear = startYear + (planToAge - currentAge);
-
   const data: CashFlowData[] = [];
-  
   for (let year = retirementYear; year <= endYear; year++) {
-    const isEarlyPhase = year < (retirementYear + 7);
-    const baseExpenses = isEarlyPhase ? 165000 : 155000;
-    const expenses = baseExpenses + (Math.sin(year) * 2000);
-    const fixedIncome = 45000; 
-    
-    let variableIncome = 0;
-    if (isEarlyPhase) {
-        variableIncome = 130000 + (Math.random() * 5000);
-    } else {
-        variableIncome = 120000 + (Math.random() * 10000);
-    }
-
     data.push({
       year,
-      expenses: Math.round(expenses),
-      fixedIncome,
-      variableIncome: Math.round(variableIncome)
+      expenses: 160000,
+      fixedIncome: 45000, 
+      variableIncome: 125000
     });
   }
   return data;

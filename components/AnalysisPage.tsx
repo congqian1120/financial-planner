@@ -9,7 +9,7 @@ import GoalDetails from './GoalDetails';
 import RetirementSavingsStrategy from './RetirementSavingsStrategy';
 import AssetAllocationPage from './AssetAllocationPage';
 import { ViewMode, ProjectionType, AppData } from '../types';
-import { generateProjectionData, generateCashFlowData, CURRENT_YEAR, DEFAULT_CURRENT_AGE, STRATEGY_MARKET_PARAMS } from '../constants';
+import { generateProjectionData, generateCashFlowData, CURRENT_YEAR, DEFAULT_CURRENT_AGE, STRATEGY_MARKET_PARAMS, ASSET_CLASS_MARKET_PARAMS } from '../constants';
 
 interface AnalysisPageProps {
   data: AppData;
@@ -25,28 +25,61 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
 
   const { household, retirement, accounts, modeledStrategy } = data;
 
-  // Calculate dynamic data for charts using the Fischer Equation-based Real Returns
   const { projectionData, cashFlowData, retirementYear, summaryStats } = useMemo(() => {
-    // Filter accounts: if not planning with partner, exclude accounts owned by "MONEY" (partner)
+    // 1. Filter relevant accounts
     const filteredAccounts = accounts.filter(acc => {
         const isRetirementGoal = acc.goal === 'RETIREMENT';
         if (!isRetirementGoal) return false;
-        
-        // If "Planning with partner" is OFF, exclude partner's accounts
         if (!household.planningWithPartner && acc.owner === 'MONEY') return false;
-        
         return true;
     });
 
     const totalSaved = filteredAccounts.reduce((sum, a) => sum + a.value, 0);
     const totalContributions = filteredAccounts.reduce((sum, a) => sum + a.contributions, 0);
 
+    // 2. Calculate dynamic Market Parameters based on real holdings
+    let customMean = 0;
+    let customVol = 0;
+
+    if (totalSaved > 0) {
+        let weightedMean = 0;
+        let weightedVol = 0;
+
+        filteredAccounts.forEach(acc => {
+            const weight = acc.value / totalSaved;
+            const b = acc.assetBreakdown || { domestic: 0, foreign: 0, bonds: 0, shortTerm: 100, other: 0 };
+            
+            // Expected return of this specific account
+            const accMean = 
+                (b.domestic/100) * ASSET_CLASS_MARKET_PARAMS.domestic.mean +
+                (b.foreign/100) * ASSET_CLASS_MARKET_PARAMS.foreign.mean +
+                (b.bonds/100) * ASSET_CLASS_MARKET_PARAMS.bonds.mean +
+                (b.shortTerm/100) * ASSET_CLASS_MARKET_PARAMS.shortTerm.mean +
+                (b.other/100) * ASSET_CLASS_MARKET_PARAMS.other.mean;
+
+            // Simple weighted volatility (in reality, correlation matrices are used, but this is a solid proxy)
+            const accVol = 
+                (b.domestic/100) * ASSET_CLASS_MARKET_PARAMS.domestic.vol +
+                (b.foreign/100) * ASSET_CLASS_MARKET_PARAMS.foreign.vol +
+                (b.bonds/100) * ASSET_CLASS_MARKET_PARAMS.bonds.vol +
+                (b.shortTerm/100) * ASSET_CLASS_MARKET_PARAMS.shortTerm.vol +
+                (b.other/100) * ASSET_CLASS_MARKET_PARAMS.other.vol;
+
+            weightedMean += accMean * weight;
+            weightedVol += accVol * weight;
+        });
+
+        customMean = weightedMean;
+        customVol = weightedVol;
+    }
+
+    // 3. Determine if we use the Modeled Strategy or our Custom Calculated Mix
+    const params = modeledStrategy 
+        ? (STRATEGY_MARKET_PARAMS[modeledStrategy] || STRATEGY_MARKET_PARAMS['Moderate'])
+        : { mean: customMean || 0.045, vol: customVol || 0.11 };
+
     const birthYear = new Date(household.dob).getFullYear();
     const currentAge = isNaN(birthYear) ? DEFAULT_CURRENT_AGE : (CURRENT_YEAR - birthYear);
-
-    // Determine modeling parameters
-    const strategy = modeledStrategy || 'Moderate';
-    const params = STRATEGY_MARKET_PARAMS[strategy] || STRATEGY_MARKET_PARAMS['Moderate'];
 
     const projData = generateProjectionData(
       currentAge, 
@@ -66,13 +99,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ data, onNavigate, updateDat
     
     const retYear = CURRENT_YEAR + (retirement.retirementAge - currentAge);
 
-    // Calculate dynamic monthly income estimates for the summary (Today's Dollars)
     const finalYearData = projData[projData.length - 1];
     const avgMonthlyIncome = Math.round((finalYearData.average * 0.04) / 12);
     const belowAvgMonthlyIncome = Math.round((finalYearData.belowAverage * 0.04) / 12);
     const sigBelowAvgMonthlyIncome = Math.round((finalYearData.significantlyBelowAverage * 0.04) / 12);
     
-    // Adjust "Monthly Need": If planning solo, assume expenses are 65% of the joint household expense
     let monthlyNeed = data.expenses.essential + data.expenses.nonEssential;
     if (!household.planningWithPartner) {
         monthlyNeed = Math.round(monthlyNeed * 0.65);
