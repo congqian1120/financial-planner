@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import AnalysisPage from './components/AnalysisPage';
@@ -95,7 +94,7 @@ const App: React.FC = () => {
       partnerDob: "January 1, 1994",
       partnerIncome: 72000,
       partnerBonus: 0,
-      planningWithPartner: false, // Changed to false by default as requested
+      planningWithPartner: false, 
     },
     retirement: {
       retirementAge: 69,
@@ -131,7 +130,8 @@ const App: React.FC = () => {
       annuity: 0,
       other: 0,
       oneTime: 0,
-    }
+    },
+    modeledStrategy: null
   });
 
   const updateData = (updates: Partial<AppData>) => {
@@ -168,7 +168,7 @@ const App: React.FC = () => {
     }
 
     if (currentStep === 5) {
-      return <AnalysisPage data={data} onNavigate={setCurrentStep} />;
+      return <AnalysisPage data={data} updateData={updateData} onNavigate={setCurrentStep} />;
     }
     
     return <HouseholdProfile data={data} updateData={updateData} onNext={nextStep} />;

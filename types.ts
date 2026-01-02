@@ -72,4 +72,5 @@ export interface AppData {
     other: number;
     oneTime: number;
   };
+  modeledStrategy?: string | null;
 }

@@ -1,4 +1,3 @@
-
 import { ProjectionData, CashFlowData } from './types';
 
 export const CURRENT_YEAR = 2025;
@@ -6,12 +5,19 @@ export const DEFAULT_CURRENT_AGE = 33;
 
 // Simulation Configuration
 const NUM_TRIALS = 1000;
-const INFLATION_RATE = 0.025;
 
-// Moderate Asset Mix Assumptions (Real Returns)
-// Mean: ~4.5% real, Std Dev: ~11% (Typical for a 60/40 or 70/30 portfolio)
-const MEAN_REAL_RETURN = 0.045; 
-const VOLATILITY = 0.11;
+// Market assumptions for different strategies (Real Returns)
+export const STRATEGY_MARKET_PARAMS: Record<string, { mean: number; vol: number }> = {
+  'Short-term': { mean: 0.015, vol: 0.03 },
+  'Conservative': { mean: 0.025, vol: 0.06 },
+  'Moderate with income': { mean: 0.035, vol: 0.08 },
+  'Moderate': { mean: 0.045, vol: 0.11 },
+  'Balanced': { mean: 0.050, vol: 0.125 },
+  'Growth with income': { mean: 0.055, vol: 0.14 },
+  'Growth': { mean: 0.060, vol: 0.16 },
+  'Aggressive growth': { mean: 0.065, vol: 0.18 },
+  'Most aggressive': { mean: 0.072, vol: 0.22 },
+};
 
 /**
  * Box-Muller transform to generate a random number from a normal distribution
@@ -28,7 +34,9 @@ export const generateProjectionData = (
   retirementAge: number, 
   planToAge: number, 
   totalSaved: number, 
-  annualContribution: number
+  annualContribution: number,
+  meanReturn: number = 0.045, // Default to Moderate
+  volatility: number = 0.11    // Default to Moderate
 ): ProjectionData[] => {
   const startYear = CURRENT_YEAR;
   const numYears = planToAge - currentAge;
@@ -43,7 +51,7 @@ export const generateProjectionData = (
       const prevBalance = trials[trialIdx][yearIdx - 1];
       
       // Generate a random return for this year (Stochastic component)
-      const randomReturn = MEAN_REAL_RETURN + (gaussianRandom() * VOLATILITY);
+      const randomReturn = meanReturn + (gaussianRandom() * volatility);
       
       // Accumulation vs Withdrawal phase
       const contribution = yearIdx <= retirementYearOffset ? annualContribution : 0;

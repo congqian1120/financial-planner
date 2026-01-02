@@ -5,6 +5,7 @@ import { AppData, Account } from '../types';
 
 interface AssetAllocationPageProps {
   data: AppData;
+  updateData: (updates: Partial<AppData>) => void;
   onBack: () => void;
   onNavigate: (step: number) => void;
 }
@@ -20,6 +21,18 @@ const STRATEGIES = [
   { name: 'Aggressive growth', description: 'Seeks high long-term returns', isRecommended: true },
   { name: 'Most aggressive', description: 'Highest volatility' },
 ];
+
+const STRATEGY_ALLOCATIONS: Record<string, number[]> = {
+  'Short-term': [0, 0, 0, 100, 0],
+  'Conservative': [15, 5, 50, 30, 0],
+  'Moderate with income': [25, 10, 45, 20, 0],
+  'Moderate': [35, 15, 40, 10, 0],
+  'Balanced': [42, 18, 35, 5, 0],
+  'Growth with income': [50, 20, 25, 5, 0],
+  'Growth': [55, 25, 15, 5, 0],
+  'Aggressive growth': [60, 25, 10, 5, 0],
+  'Most aggressive': [70, 30, 0, 0, 0],
+};
 
 const ASSET_CLASSES = [
   { name: 'Domestic', color: '#004a99' },
@@ -86,10 +99,10 @@ const CustomHistoricalTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack, onNavigate }) => {
+const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, updateData, onBack, onNavigate }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [subTab, setSubTab] = useState('Current allocation by account');
-  const [selectedStrategy, setSelectedStrategy] = useState('Aggressive growth');
+  const [selectedStrategy, setSelectedStrategy] = useState(data.modeledStrategy || 'Aggressive growth');
   const [isLoading, setIsLoading] = useState(true);
   const [historicalViewMode, setHistoricalViewMode] = useState<'Chart' | 'Table'>('Chart');
   const [comparisonPeriod, setComparisonPeriod] = useState<'1 year' | '5 years'>('1 year');
@@ -132,13 +145,16 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
     { name: 'Other', value: 0.6, color: '#e57200' },
   ];
 
-  const targetMixData = [
-    { name: 'Domestic stock', value: 60, color: '#004a99' },
-    { name: 'Foreign stock', value: 25, color: '#00a0d2' },
-    { name: 'Bonds', value: 10, color: '#6ab023' },
-    { name: 'Short term', value: 5, color: '#ffc20e' },
-    { name: 'Other', value: 0, color: '#e57200' },
-  ];
+  const targetMixData = useMemo(() => {
+    const allocation = STRATEGY_ALLOCATIONS[selectedStrategy] || [0, 0, 0, 0, 0];
+    return [
+      { name: 'Domestic stock', value: allocation[0], color: '#004a99' },
+      { name: 'Foreign stock', value: allocation[1], color: '#00a0d2' },
+      { name: 'Bonds', value: allocation[2], color: '#6ab023' },
+      { name: 'Short term', value: allocation[3], color: '#ffc20e' },
+      { name: 'Other', value: allocation[4], color: '#e57200' },
+    ];
+  }, [selectedStrategy]);
 
   const tableRows = [
     {
@@ -221,6 +237,11 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleUpdateAnalysis = () => {
+    updateData({ modeledStrategy: selectedStrategy });
+    onBack();
+  };
 
   const renderCurrentMix = (showStats = true) => (
     <div className="flex flex-col items-center w-full animate-in fade-in duration-500">
@@ -468,19 +489,25 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
                                     </ResponsiveContainer>
                                 </div>
                                 <div className="w-full max-w-[240px] space-y-1.5 mb-12">
-                                    {targetMixData.map((item, index) => (
-                                        <div key={index} className="flex items-center justify-between text-[12px]">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></div>
-                                                <span className="text-slate-600 font-medium">{item.name}</span>
+                                    {targetMixData.map((item, index) => {
+                                        if (item.value === 0) return null;
+                                        return (
+                                            <div key={index} className="flex items-center justify-between text-[12px]">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></div>
+                                                    <span className="text-slate-600 font-medium">{item.name}</span>
+                                                </div>
+                                                <span className="text-slate-700 font-bold">{item.value}%</span>
                                             </div>
-                                            <span className="text-slate-700 font-bold">{item.value}%</span>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                                 
                                 <div className="flex flex-col gap-3 w-full max-w-[280px]">
-                                    <button className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2.5 px-8 rounded-full text-sm transition-all shadow-sm">
+                                    <button 
+                                        onClick={handleUpdateAnalysis}
+                                        className="bg-[#4d7c0f] hover:bg-[#3f6212] text-white font-bold py-2.5 px-8 rounded-full text-sm transition-all shadow-sm"
+                                    >
                                         Update analysis
                                     </button>
                                     <button className="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-8 rounded-full text-sm transition-all">
@@ -577,7 +604,7 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
                             <thead className="bg-[#f1f5f9] border-b border-slate-200">
                                 <tr>
                                     <th className="p-5 text-sm font-bold text-slate-700 border-r border-slate-200 w-56">Asset mix</th>
-                                    {ASSET_CLASSES.map(ac => (
+                                    {ASSET_CLASSES.slice(0, 5).map(ac => (
                                         <th key={ac.name} className="p-5 text-sm font-bold text-slate-700 border-r last:border-r-0 border-slate-200">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ac.color }}></div>
@@ -590,23 +617,27 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
                             <tbody>
                                 <tr className="bg-white border-b border-slate-200">
                                     <td className="p-5 text-sm font-bold text-slate-700 border-r border-slate-200">Target</td>
-                                    {comparisonData.target.map((val, i) => (
-                                        <td key={i} className="p-5 text-sm font-medium text-slate-700 border-r last:border-r-0 border-slate-200">{val}%</td>
+                                    {targetMixData.map((item, i) => (
+                                        <td key={i} className="p-5 text-sm font-medium text-slate-700 border-r last:border-r-0 border-slate-200">{item.value}%</td>
                                     ))}
                                 </tr>
                                 <tr className="bg-[#f8fafc] border-b border-slate-200">
                                     <td className="p-5 text-sm font-bold text-slate-700 border-r border-slate-200">Current</td>
-                                    {comparisonData.current.map((val, i) => (
-                                        <td key={i} className="p-5 text-sm font-medium text-slate-700 border-r last:border-r-0 border-slate-200">{val}%</td>
+                                    {currentMixData.map((item, i) => (
+                                        <td key={i} className="p-5 text-sm font-medium text-slate-700 border-r last:border-r-0 border-slate-200">{item.value}%</td>
                                     ))}
                                 </tr>
                                 <tr className="bg-white">
                                     <td className="p-5 text-sm font-bold text-slate-700 border-r border-slate-200">Comparison</td>
-                                    {comparisonData.comparison.map((val, i) => (
-                                        <td key={i} className={`p-5 text-sm font-bold border-r last:border-r-0 border-slate-200 ${val < 0 ? 'text-slate-700' : 'text-slate-700'}`}>
-                                            {val.toFixed(2)}%
-                                        </td>
-                                    ))}
+                                    {targetMixData.map((item, i) => {
+                                        const currentVal = currentMixData[i].value;
+                                        const diff = item.value - currentVal;
+                                        return (
+                                            <td key={i} className="p-5 text-sm font-bold border-r last:border-r-0 border-slate-200 text-slate-700">
+                                                {diff.toFixed(2)}%
+                                            </td>
+                                        );
+                                    })}
                                 </tr>
                             </tbody>
                         </table>
@@ -633,7 +664,7 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
 
                     <div className="w-full max-w-5xl text-center space-y-4 mb-12">
                         <h2 className="text-xl font-normal text-slate-800">Historically, staying invested longer helped reduce exposure to short-term market fluctuations</h2>
-                        <h3 className="text-lg font-bold text-slate-700 uppercase tracking-tight">Aggressive growth asset mix</h3>
+                        <h3 className="text-lg font-bold text-slate-700 uppercase tracking-tight">{selectedStrategy} asset mix</h3>
                         <p className="text-xs text-slate-500">Annualized index returns 1926-2024: <span className="font-bold">9.62%</span></p>
                     </div>
 
@@ -702,7 +733,7 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, onBack,
                                               <LabelList 
                                                   dataKey="negRange" 
                                                   position="bottom" 
-                                                  formatter={(val: [number, number]) => val[0] < 0 ? `${val[0]}%` : ''} 
+                                                  formatter={(val: [number, number]) => `${val[0]}%`} 
                                                   style={{ fontSize: '11px', fontWeight: 'bold', fill: '#1e293b' }} 
                                               />
                                           </Bar>
