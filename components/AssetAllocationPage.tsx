@@ -277,7 +277,7 @@ const AssetAllocationPage: React.FC<AssetAllocationPageProps> = ({ data, updateD
         <h1 className="text-3xl font-light text-slate-800 mb-4">Asset mix and allocation</h1>
         
         <p className="text-slate-600 text-sm leading-relaxed max-w-5xl mb-12">
-            Your personal investment strategy can be an important factor to achieving your goals. Review your current asset mix below, and model a change in asset mix to help you evaluate the potential impact for your retirement plan. This modeling will not change your current asset mix or portfolio. <a href="#" className="text-blue-700 hover:underline inline-flex items-center gap-1 font-medium decoration-1 underline-offset-2">Learn more about personalized investing strategies <ExternalLink size={14} /></a>
+            Your personal investment strategy can be an important factor to achieving your goals. Review your current asset mix below, and model a change in asset mix to help you evaluate the potential impact for your retirement plan. This modeling will not change your current asset mix or portfolio.
         </p>
 
         {/* Tab Selection */}
