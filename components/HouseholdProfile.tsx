@@ -12,7 +12,6 @@ interface HouseholdProfileProps {
 export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, updateData, onNext, onPrevious }) => {
   const [isBonusExpanded, setIsBonusExpanded] = useState(true);
   
-  // Local edit states
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingDob, setIsEditingDob] = useState(false);
   const [isEditingPartnerName, setIsEditingPartnerName] = useState(false);
@@ -22,6 +21,11 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
 
   const updateHousehold = (updates: Partial<typeof household>) => {
     updateData({ household: { ...household, ...updates } });
+  };
+
+  const handleNumericChange = (key: 'income' | 'bonus' | 'partnerIncome', value: string) => {
+    const cleanValue = parseInt(value.replace(/[^0-9]/g, '')) || 0;
+    updateHousehold({ [key]: cleanValue });
   };
 
   return (
@@ -34,7 +38,6 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
             <h2 className="text-xl font-medium text-slate-800 mb-6">Personal information</h2>
             
             <div className="space-y-8 max-w-lg">
-                {/* Name */}
                 <div>
                     <div className="flex items-baseline gap-3 mb-1">
                         <label className="text-sm font-bold text-slate-800">Name</label>
@@ -50,14 +53,13 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                             type="text" 
                             value={household.name} 
                             onChange={(e) => updateHousehold({ name: e.target.value })}
-                            className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm uppercase"
+                            className="w-full border border-slate-300 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm uppercase"
                         />
                     ) : (
                         <div className="text-lg text-slate-700 uppercase tracking-wide">{household.name}</div>
                     )}
                 </div>
 
-                {/* DOB */}
                 <div>
                     <div className="flex items-baseline gap-3 mb-1">
                         <label className="text-sm font-bold text-slate-800">Date of birth</label>
@@ -73,7 +75,7 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                             type="text" 
                             value={household.dob}
                             onChange={(e) => updateHousehold({ dob: e.target.value })}
-                            className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                            className="w-full border border-slate-300 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                         />
                     ) : (
                         <>
@@ -83,14 +85,13 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                     )}
                 </div>
 
-                {/* Gender */}
                 <div>
                     <div className="flex items-center gap-2 mb-2">
                         <label className="text-sm font-bold text-slate-800">Gender</label>
                         <HelpCircle size={16} className="text-blue-700 fill-white" />
                     </div>
                     <div className="relative w-40">
-                        <select className="w-full appearance-none bg-white border border-slate-300 hover:border-slate-400 text-slate-700 py-2.5 px-3 pr-8 rounded-sm leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                        <select className="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-2.5 px-3 pr-8 rounded-sm leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                             <option>Male</option>
                             <option>Female</option>
                         </select>
@@ -100,7 +101,6 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                     </div>
                 </div>
 
-                {/* Earned Income */}
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <label className="text-sm font-bold text-slate-800">Earned income</label>
@@ -111,14 +111,12 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                         <span className="absolute left-3 top-2.5 text-slate-500 font-medium">$</span>
                         <input 
                             type="text" 
-                            className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
-                            placeholder="0" 
-                            value={household.income}
-                            onChange={(e) => updateHousehold({ income: parseInt(e.target.value) || 0 })}
+                            className="w-full border border-slate-300 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
+                            value={household.income.toLocaleString()}
+                            onChange={(e) => handleNumericChange('income', e.target.value)}
                         />
                     </div>
 
-                    {/* Bonus Toggle */}
                     <button 
                         onClick={() => setIsBonusExpanded(!isBonusExpanded)}
                         className="flex items-center gap-2 text-slate-700 hover:text-slate-900 mb-4 group"
@@ -131,7 +129,6 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                         <span className="font-medium">Add bonus or commissions</span>
                     </button>
 
-                    {/* Bonus Fields */}
                     {isBonusExpanded && (
                         <div className="pl-7 space-y-4 animate-in slide-in-from-top-2 duration-200">
                              <div>
@@ -140,9 +137,9 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                                     <span className="absolute left-3 top-2.5 text-slate-500 font-medium">$</span>
                                     <input 
                                         type="text" 
-                                        className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
-                                        value={household.bonus}
-                                        onChange={(e) => updateHousehold({ bonus: parseInt(e.target.value) || 0 })}
+                                        className="w-full border border-slate-300 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
+                                        value={household.bonus.toLocaleString()}
+                                        onChange={(e) => handleNumericChange('bonus', e.target.value)}
                                     />
                                 </div>
                              </div>
@@ -152,7 +149,6 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                 
                 <div className="pt-8 border-t border-dotted border-slate-300"></div>
 
-                {/* Household Planning */}
                 <div>
                      <h2 className="text-xl font-medium text-slate-800 mb-4">Household planning</h2>
                      <div className="flex items-center gap-2 mb-3">
@@ -183,7 +179,6 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                              </div>
 
                              <div className="space-y-8 pl-1">
-                                 {/* Partner's Name */}
                                 <div>
                                     <div className="flex items-baseline gap-3 mb-1">
                                         <label className="text-sm font-bold text-slate-800">Partner's name</label>
@@ -199,14 +194,13 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                                             type="text" 
                                             value={household.partnerName}
                                             onChange={(e) => updateHousehold({ partnerName: e.target.value })}
-                                            className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                                            className="w-full border border-slate-300 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                                         />
                                     ) : (
                                         <div className="text-lg text-slate-700 tracking-wide uppercase">{household.partnerName}</div>
                                     )}
                                 </div>
 
-                                 {/* Partner's DOB */}
                                 <div>
                                     <div className="flex items-baseline gap-3 mb-1">
                                         <label className="text-sm font-bold text-slate-800">Partner's date of birth</label>
@@ -222,7 +216,7 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                                             type="text" 
                                             value={household.partnerDob}
                                             onChange={(e) => updateHousehold({ partnerDob: e.target.value })}
-                                            className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                                            className="w-full border border-slate-300 rounded-sm py-2 px-3 text-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                                         />
                                     ) : (
                                         <>
@@ -232,7 +226,6 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                                     )}
                                 </div>
 
-                                {/* Partner Income - Added for completeness */}
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
                                         <label className="text-sm font-bold text-slate-800">Partner's earned income</label>
@@ -242,10 +235,9 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
                                         <span className="absolute left-3 top-2.5 text-slate-500 font-medium">$</span>
                                         <input 
                                             type="text" 
-                                            className="w-full border border-slate-300 hover:border-slate-400 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
-                                            placeholder="0" 
-                                            value={household.partnerIncome}
-                                            onChange={(e) => updateHousehold({ partnerIncome: parseInt(e.target.value) || 0 })}
+                                            className="w-full border border-slate-300 rounded-sm py-2 pl-6 pr-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm" 
+                                            value={household.partnerIncome.toLocaleString()}
+                                            onChange={(e) => handleNumericChange('partnerIncome', e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -256,7 +248,6 @@ export const HouseholdProfile: React.FC<HouseholdProfileProps> = ({ data, update
             </div>
         </div>
 
-        {/* Footer */}
         <div className="border-t border-slate-200 p-4 bg-white flex justify-between sticky bottom-0 z-20">
              <div>
                  {onPrevious && (

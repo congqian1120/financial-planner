@@ -5,7 +5,8 @@ export const CURRENT_YEAR = 2025;
 export const DEFAULT_CURRENT_AGE = 33;
 
 // Simulation Configuration
-const NUM_TRIALS = 1000;
+// Increased to 5,000 for production-grade statistical stability (+/- 1.5% margin of error)
+const NUM_TRIALS = 5000;
 
 export interface SimulationResult {
   projectionData: ProjectionData[];
@@ -15,7 +16,6 @@ export interface SimulationResult {
 /** 
  * Market assumptions per asset class (Real Returns - Inflation Adjusted)
  */
-// Fix: renamed 'vol' to 'volatility' to align with the fetchProjectionResult parameters
 export const ASSET_CLASS_MARKET_PARAMS: Record<string, { mean: number; volatility: number }> = {
   domestic: { mean: 0.065, volatility: 0.18 },
   foreign: { mean: 0.070, volatility: 0.21 },
@@ -25,7 +25,6 @@ export const ASSET_CLASS_MARKET_PARAMS: Record<string, { mean: number; volatilit
 };
 
 // Market assumptions for predefined strategies
-// Fix: renamed 'vol' to 'volatility' to align with the fetchProjectionResult parameters
 export const STRATEGY_MARKET_PARAMS: Record<string, { mean: number; volatility: number }> = {
   'Short-term': { mean: 0.015, volatility: 0.03 },
   'Conservative': { mean: 0.025, volatility: 0.06 },
@@ -55,7 +54,7 @@ export const fetchProjectionResult = async (
   totalSaved: number, 
   annualContribution: number,
   params: { mean: number; volatility: number },
-  monthlyExpenses: number // Needed for failure detection
+  monthlyExpenses: number 
 ): Promise<SimulationResult> => {
   // Simulate network latency
   await new Promise(resolve => setTimeout(resolve, 300));

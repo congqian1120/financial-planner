@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import AnalysisPage from './components/AnalysisPage';
 import { HouseholdProfile } from './components/HouseholdProfile';
@@ -7,6 +7,8 @@ import RetirementExpenses from './components/RetirementExpenses';
 import AccountsPage from './components/AccountsPage';
 import RetirementIncome from './components/RetirementIncome';
 import { AppData, Account } from './types';
+
+const STORAGE_KEY = 'retirement_planner_data';
 
 const INITIAL_ACCOUNTS: Account[] = [
   { 
@@ -48,7 +50,7 @@ const INITIAL_ACCOUNTS: Account[] = [
     number: "XXXX8822", 
     goal: "RETIREMENT", 
     type: "401K RETIREMENT SAVINGS PLAN", 
-    owner: "MONEY", // Partner account
+    owner: "MONEY",
     value: 312450.00, 
     contributions: 15000,
     assetBreakdown: { domestic: 65.00, foreign: 25.00, bonds: 10.00, shortTerm: 0, other: 0 }
@@ -81,65 +83,113 @@ const INITIAL_ACCOUNTS: Account[] = [
     number: "XXXX1122", 
     goal: "RETIREMENT", 
     type: "ROTH IRA\nSelf-Directed", 
-    owner: "MONEY", // Partner account
+    owner: "MONEY",
     value: 42100.00, 
     contributions: 6000,
     assetBreakdown: { domestic: 95.00, foreign: 5.00, bonds: 0, shortTerm: 0, other: 0 }
   },
 ];
 
+const DEFAULT_DATA: AppData = {
+  household: {
+    name: "RICH WISE",
+    dob: "October 4, 1992",
+    income: 136750,
+    bonus: 21250,
+    partnerName: "MONEY WISE",
+    partnerDob: "January 1, 1994",
+    partnerIncome: 72000,
+    partnerBonus: 0,
+    planningWithPartner: false, 
+  },
+  retirement: {
+    retirementAge: 69,
+    partnerRetirementAge: 67,
+    planToAge: 97,
+    state: "North Carolina",
+  },
+  expenses: {
+    method: 'monthly',
+    lifestyle: 'average',
+    essential: 10666,
+    nonEssential: 2666,
+    detailed: {
+      'Housing & mortgage': 0,
+      'Utilities': 0,
+      'Health care & insurance': 0,
+      'Transportation': 0,
+      'Personal': 0,
+      'Recreation': 0,
+      'Entertainment': 0,
+      'Custom expenses': 0,
+      'Family care': 0,
+    },
+  },
+  accounts: INITIAL_ACCOUNTS,
+  income: {
+    socialSecurity: {
+      amount: 3750, 
+      startAge: 67,
+      enabled: true,
+    },
+    pension: 0,
+    annuity: 0,
+    other: 0,
+    oneTime: 0,
+  },
+  modeledStrategy: null
+};
+
+// Simple Error Boundary Functional Component
+const AppErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [hasError, setHasError] = useState(false);
+  
+  useEffect(() => {
+    const handleError = (error: ErrorEvent) => {
+      console.error("Uncaught error:", error);
+      setHasError(true);
+    };
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  if (hasError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
+        <div className="bg-white p-8 rounded shadow-lg max-w-md text-center">
+          <h2 className="text-xl font-bold text-slate-800 mb-4">Something went wrong</h2>
+          <p className="text-slate-600 mb-6">The application encountered an unexpected error. Your progress has been saved.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-green-700 text-white px-6 py-2 rounded-full font-bold"
+          >
+            Reload Planner
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+};
+
 const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
-
-  const [data, setData] = useState<AppData>({
-    household: {
-      name: "RICH WISE",
-      dob: "October 4, 1992",
-      income: 136750,
-      bonus: 21250,
-      partnerName: "MONEY WISE",
-      partnerDob: "January 1, 1994",
-      partnerIncome: 72000,
-      partnerBonus: 0,
-      planningWithPartner: false, 
-    },
-    retirement: {
-      retirementAge: 69,
-      partnerRetirementAge: 67,
-      planToAge: 97,
-      state: "North Carolina",
-    },
-    expenses: {
-      method: 'monthly',
-      lifestyle: 'average',
-      essential: 10666,
-      nonEssential: 2666,
-      detailed: {
-        'Housing & mortgage': 0,
-        'Utilities': 0,
-        'Health care & insurance': 0,
-        'Transportation': 0,
-        'Personal': 0,
-        'Recreation': 0,
-        'Entertainment': 0,
-        'Custom expenses': 0,
-        'Family care': 0,
-      },
-    },
-    accounts: INITIAL_ACCOUNTS,
-    income: {
-      socialSecurity: {
-        amount: 3750, 
-        startAge: 67,
-        enabled: true,
-      },
-      pension: 0,
-      annuity: 0,
-      other: 0,
-      oneTime: 0,
-    },
-    modeledStrategy: null
+  const [data, setData] = useState<AppData>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return DEFAULT_DATA;
+      }
+    }
+    return DEFAULT_DATA;
   });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }, [data]);
 
   const updateData = (updates: Partial<AppData>) => {
     setData(prev => ({ ...prev, ...updates }));
@@ -154,40 +204,26 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
-    if (currentStep === 0) {
-      return <HouseholdProfile data={data} updateData={updateData} onNext={nextStep} />;
+    switch (currentStep) {
+      case 0: return <HouseholdProfile data={data} updateData={updateData} onNext={nextStep} />;
+      case 1: return <RetirementProfile data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
+      case 2: return <RetirementExpenses data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
+      case 3: return <AccountsPage data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
+      case 4: return <RetirementIncome data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
+      case 5: return <AnalysisPage data={data} updateData={updateData} onNavigate={setCurrentStep} />;
+      default: return <HouseholdProfile data={data} updateData={updateData} onNext={nextStep} />;
     }
-
-    if (currentStep === 1) {
-      return <RetirementProfile data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
-    }
-
-    if (currentStep === 2) {
-      return <RetirementExpenses data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
-    }
-
-    if (currentStep === 3) {
-      return <AccountsPage data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
-    }
-
-    if (currentStep === 4) {
-      return <RetirementIncome data={data} updateData={updateData} onNext={nextStep} onPrevious={prevStep} />;
-    }
-
-    if (currentStep === 5) {
-      return <AnalysisPage data={data} updateData={updateData} onNavigate={setCurrentStep} />;
-    }
-    
-    return <HouseholdProfile data={data} updateData={updateData} onNext={nextStep} />;
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 flex">
-      <Sidebar activeStep={currentStep} onStepChange={setCurrentStep} />
-      <div className="flex-1 min-w-0 flex flex-col">
-        {renderContent()}
+    <AppErrorBoundary>
+      <div className="min-h-screen bg-white font-sans text-slate-900 flex">
+        <Sidebar activeStep={currentStep} onStepChange={setCurrentStep} />
+        <div className="flex-1 min-w-0 flex flex-col">
+          {renderContent()}
+        </div>
       </div>
-    </div>
+    </AppErrorBoundary>
   );
 };
 
