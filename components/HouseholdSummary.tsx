@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { X, ExternalLink } from 'lucide-react';
@@ -6,6 +5,7 @@ import { AppData } from '../types';
 
 interface HouseholdSummaryProps {
   data: AppData;
+  probabilityOfSuccess?: number;
   summaryStats?: {
     avgMonthlyIncome: number;
     belowAvgMonthlyIncome: number;
@@ -14,14 +14,21 @@ interface HouseholdSummaryProps {
   };
 }
 
-const HouseholdSummary: React.FC<HouseholdSummaryProps> = ({ data, summaryStats }) => {
+const HouseholdSummary: React.FC<HouseholdSummaryProps> = ({ data, summaryStats, probabilityOfSuccess = 0 }) => {
   const [showProbabilityModal, setShowProbabilityModal] = useState(false);
   const { household } = data;
 
+  // Determine gauge needle color based on score
+  const getStatusColor = (score: number) => {
+    if (score >= 80) return '#22c55e'; // Green
+    if (score >= 50) return '#2dd4bf'; // Teal
+    return '#f43f5e'; // Red
+  };
+
   const gaugeData = [
-    { name: 'Low', value: 1, color: '#a78bfa' },   
-    { name: 'Mid', value: 1, color: '#2dd4bf' },   
-    { name: 'High', value: 1, color: '#22c55e' },  
+    { name: 'Low', value: 1, color: '#e2e8f0' },   
+    { name: 'Mid', value: 1, color: '#94a3b8' },   
+    { name: 'High', value: 1, color: '#475569' },  
   ];
 
   const modalGaugeData = [
@@ -35,6 +42,8 @@ const HouseholdSummary: React.FC<HouseholdSummaryProps> = ({ data, summaryStats 
   const monthlyNeed = summaryStats?.monthlyNeed || 0;
   const incomeHave = summaryStats?.sigBelowAvgMonthlyIncome || 0;
   const excess = incomeHave - monthlyNeed;
+
+  const successLabel = probabilityOfSuccess >= 80 ? 'well set' : (probabilityOfSuccess >= 50 ? 'on track' : 'at risk');
 
   return (
     <div className="mt-8 flex flex-col lg:flex-row gap-8 border-t border-slate-200 pt-8">
@@ -93,13 +102,15 @@ const HouseholdSummary: React.FC<HouseholdSummaryProps> = ({ data, summaryStats 
                     </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex items-end justify-center pb-1">
-                    <span className="text-xl font-bold text-slate-800 leading-none">99%</span>
+                    <span className="text-xl font-bold text-slate-800 leading-none" style={{ color: getStatusColor(probabilityOfSuccess) }}>
+                        {probabilityOfSuccess}%
+                    </span>
                 </div>
             </div>
             
             <div className="text-sm text-slate-600 space-y-3">
                 <p>
-                    Your plan's probability of success of <strong className="text-green-700">99%</strong> is likely well set for your planned retirement.
+                    Your plan's probability of success of <strong style={{ color: getStatusColor(probabilityOfSuccess) }}>{probabilityOfSuccess}%</strong> means you are <strong className="font-bold">{successLabel}</strong> for your planned retirement.
                 </p>
                 <p className="text-slate-500 text-xs leading-relaxed">
                     {excess >= 0 
@@ -153,7 +164,7 @@ const HouseholdSummary: React.FC<HouseholdSummaryProps> = ({ data, summaryStats 
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-end pb-0">
-                    <span className="text-4xl font-bold text-slate-900 leading-none">99%</span>
+                    <span className="text-4xl font-bold text-slate-900 leading-none">{probabilityOfSuccess}%</span>
                     <span className="text-sm text-slate-600 font-medium mt-1">Probability of success</span>
                   </div>
                 </div>
@@ -175,10 +186,10 @@ const HouseholdSummary: React.FC<HouseholdSummaryProps> = ({ data, summaryStats 
                 <div>
                   <h3 className="font-bold text-slate-800 mb-3 text-base">How are you doing?</h3>
                   <p className="text-slate-700 mb-4 leading-relaxed text-sm">
-                    Your plan has a 99% probability of success in creating the ${monthlyNeed.toLocaleString()} of monthly income we estimate you may need in retirement (in <strong>today's dollars</strong>).
+                    Your plan has a {probabilityOfSuccess}% probability of success in creating the ${monthlyNeed.toLocaleString()} of monthly income we estimate you may need in retirement (in <strong>today's dollars</strong>).
                   </p>
                   <p className="text-slate-700 leading-relaxed text-sm">
-                    This means <strong className="font-bold">you're likely well set for your planned retirement.</strong>
+                    This means <strong className="font-bold">you're {successLabel} for your planned retirement.</strong>
                   </p>
                 </div>
 
